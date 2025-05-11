@@ -1,21 +1,22 @@
-const { Trabalho, Aluno, Professor, Localizacao, Admin } = require('../../database/models');  // Importando todos os modelos necessários
+const { Trabalho, Aluno, Professor, Localizacao, Admin, GuiaSapex } = require('../../database/models');  // Importando todos os modelos necessários
+
 
 const AdminController = {
     CadastroTrabalhos: async (req, res) => {
         try {
             const { titulo, tipo, n_poster, data, horario } = req.body;
         
-            // Validação simples (opcional, adicione mais se necessário)
+            
             if (!titulo || !tipo || !n_poster || !data || !horario) {
               return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
             }
         
             const novoTrabalho = await Trabalho.create({
-              titulo,
-              tipo,
-              n_poster,
-              data,
-              horario
+                titulo,
+                tipo,
+                n_poster,
+                data,
+                horario
             });
         
             return res.status(201).json({ mensagem: 'Trabalho criado com sucesso.', trabalho: novoTrabalho });
@@ -44,6 +45,44 @@ const AdminController = {
             console.error(error);
             return res.status(500).json({
                 mensagem: 'Erro ao listar os trabalhos.',
+                erro: error.message
+            });
+        }
+    },
+    CadastroInstrucao: async (req,res) => {
+        try {
+            const { titulo, descricao } = req.body;
+        
+            
+            if (!titulo || !descricao ) {
+              return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
+            }
+        
+            const novaInstrucao = await GuiaSapex.create({
+                titulo,
+                descricao
+            });
+        
+            return res.status(201).json({ mensagem: 'Trabalho criado com sucesso.', instrucao: novaInstrucao });
+        } catch (erro) {
+            console.error('Erro ao criar trabalho:', erro);
+            return res.status(500).json({ mensagem: 'Erro interno ao criar trabalho.' });
+        }
+    
+
+    },
+    ListaInstrucao: async (req,res) => {
+        try {
+            
+            const guias = await GuiaSapex.findAll()
+    
+            // Retorno de sucesso
+            return res.status(200).json(guias);
+        } catch (error) {
+            // Caso haja erro
+            console.error(error);
+            return res.status(500).json({
+                mensagem: 'Erro ao listar Intruções.',
                 erro: error.message
             });
         }

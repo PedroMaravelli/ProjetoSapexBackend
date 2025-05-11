@@ -1,6 +1,6 @@
 // models/guia_sapex.js
 module.exports = (sequelize, DataTypes) => {
-    const GuiaSapex = sequelize.define('GuiaSapex', {
+    const GuiaSapex = sequelize.define('guia_sapex', {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
       titulo: DataTypes.STRING(60),
       descricao: DataTypes.TEXT('long')
