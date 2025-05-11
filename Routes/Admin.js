@@ -5,6 +5,8 @@ const AdminController = require('../Controllers/Admin/adminController');
 // Rota para cadastrar um novo trabalho (POST)
 router.post('/cadastrotrabalhos', AdminController.CadastroTrabalhos);
 router.post('/guia/cadastro', AdminController.CadastroInstrucao);
+router.post('/cadastrolocalizacao', AdminController.CadastroLocalizacao);
+
 
 
 // Rota para listar todos os trabalhos (GET)
