@@ -86,6 +86,27 @@ const AdminController = {
                 erro: error.message
             });
         }
+    },
+    CadastroLocalizacao: async (req,res) => {
+        try {
+            const { predio, sala, ponto_referencia } = req.body;
+        
+            
+            if (!predio || !sala || !ponto_referencia ) {
+              return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
+            }
+        
+            const localizacao = await Localizacao.create({
+               predio,
+               sala,
+               ponto_referencia
+            });
+        
+            return res.status(201).json({ mensagem: 'Trabalho criado com sucesso.', local: localizacao });
+        } catch (erro) {
+            console.error('Erro ao criar trabalho:', erro);
+            return res.status(500).json({ mensagem: 'Erro interno ao criar trabalho.' });
+        }
     }
 };
 
