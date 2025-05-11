@@ -1,4 +1,6 @@
-const { Trabalho, Aluno, Professor, Localizacao, Admin, GuiaSapex } = require('../../database/models');  // Importando todos os modelos necessários
+const { Trabalho, Aluno, Professor, Localizacao, Admin, GuiaSapex } = require('../../database/models');  // Importando todos os modelos necessário
+const bcrypt = require('bcrypt');
+
 
 
 const AdminController = {
@@ -107,7 +109,30 @@ const AdminController = {
             console.error('Erro ao criar trabalho:', erro);
             return res.status(500).json({ mensagem: 'Erro interno ao criar trabalho.' });
         }
+    },
+    Login: async (req,res) => {
+        try {
+        const { email, senha } = req.body;
+
+        
+        const admin = await Admin.findOne({ where: { email } });
+
+        if (!admin) {
+        return res.status(400).json({ message: "Usuário não encontrado" });
+        }
+
+        
+        if (senha !== admin.senha) {
+        return res.status(400).json({ message: "Senha incorreta" });
+        }
+
+        return res.status(200).json({ message: "Login bem-sucedido" });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Erro no servidor" });
     }
+
+        }
 };
 
-module.exports = AdminController;  // Exportando o controlador de forma correta
+module.exports = AdminController;  
