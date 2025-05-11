@@ -1,37 +1,34 @@
-// models/index.js
-
 const { Sequelize, DataTypes } = require('sequelize');
 const path = require('path');
 
 // Conexão com o banco de dados
-const sequelize = new Sequelize('nome_do_banco', 'root', 'Peixe123!', {
+const sequelize = new Sequelize('mydb', 'root', 'Peixe123!', {
   host: 'localhost',
-  dialect: 'mysql', // ou 'postgres', 'sqlite', 'mariadb'
-  logging: false,   // tira os logs no console
+  dialect: 'mysql',
+  logging: false,
 });
 
-// Carregar todos os modelos
 const db = {};
 
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 // Importando os modelos
-db.Aluno = require('./aluno')(sequelize, DataTypes);
-db.Professor = require('./professor')(sequelize, DataTypes);
-db.Localizacao = require('./localizacao')(sequelize, DataTypes);
-db.Trabalho = require('./trabalho')(sequelize, DataTypes);
-db.Admin = require('./admin')(sequelize, DataTypes);
-db.GuiaSapex = require('./guia_sapex')(sequelize, DataTypes);
-db.AdminHasTrabalho = require('./admin_has_trabalho')(sequelize, DataTypes);
-db.AdminHasGuiaSapex = require('./admin_has_guia_sapex')(sequelize, DataTypes);
+db.Aluno = require('./Aluno')(sequelize, DataTypes);
+db.Professor = require('./Professor')(sequelize, DataTypes);
+db.Localizacao = require('./Localizacao')(sequelize, DataTypes);
+db.Trabalho = require('./Trabalho')(sequelize, DataTypes);
+db.Admin = require('./Admin')(sequelize, DataTypes);
+db.GuiaSapex = require('./GuiaSapex')(sequelize, DataTypes);
+db.AdminHasTrabalho = require('./AdminHasTrabalho')(sequelize, DataTypes);
+db.AdminHasGuiaSapex = require('./AdminHasGuiaSapex')(sequelize, DataTypes);
 
-// Criando as associações (chamando a função associate de cada modelo)
+// Criando as associações
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
   }
 });
 
-// Exportar para usar nos controllers, services, etc.
+// Exporte somente o objeto db, que contém tudo que precisa
 module.exports = db;

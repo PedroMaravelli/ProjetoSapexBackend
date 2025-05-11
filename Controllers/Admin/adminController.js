@@ -1,0 +1,53 @@
+const { Trabalho, Aluno, Professor, Localizacao, Admin } = require('../../database/models');  // Importando todos os modelos necessários
+
+const AdminController = {
+    CadastroTrabalhos: async (req, res) => {
+        try {
+            const { titulo, tipo, n_poster, data, horario } = req.body;
+        
+            // Validação simples (opcional, adicione mais se necessário)
+            if (!titulo || !tipo || !n_poster || !data || !horario) {
+              return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
+            }
+        
+            const novoTrabalho = await Trabalho.create({
+              titulo,
+              tipo,
+              n_poster,
+              data,
+              horario
+            });
+        
+            return res.status(201).json({ mensagem: 'Trabalho criado com sucesso.', trabalho: novoTrabalho });
+        } catch (erro) {
+            console.error('Erro ao criar trabalho:', erro);
+            return res.status(500).json({ mensagem: 'Erro interno ao criar trabalho.' });
+        }
+    },
+
+    ListaTrabalhos: async (req, res) => {
+        try {
+            // Buscando todos os trabalhos com seus relacionamentos
+            const trabalhos = await Trabalho.findAll({
+                include: [
+                    { model: Aluno, attributes: ['id', 'nome'] },
+                    { model: Professor, attributes: ['id', 'nome'] },
+                    { model: Localizacao, attributes: ['id', 'predio'] },
+                    { model: Admin, attributes: ['id', 'nome'] }
+                ]
+            });
+    
+            // Retorno de sucesso
+            return res.status(200).json(trabalhos);
+        } catch (error) {
+            // Caso haja erro
+            console.error(error);
+            return res.status(500).json({
+                mensagem: 'Erro ao listar os trabalhos.',
+                erro: error.message
+            });
+        }
+    }
+};
+
+module.exports = AdminController;  // Exportando o controlador de forma correta
