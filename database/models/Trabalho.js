@@ -7,7 +7,10 @@ module.exports = (sequelize, DataTypes) => {
         n_poster: DataTypes.INTEGER,
         data: DataTypes.DATE,
         horario: DataTypes.STRING(45)
-        });
+        }, {
+            freezeTableName: true, 
+            timestamps: false  // <- desativa createdAt e updatedAt// <-- adicione esta linha
+          });
     
         Trabalho.associate = (models) => {
         Trabalho.belongsTo(models.Aluno, { foreignKey: 'aluno_id' });
