@@ -6,7 +6,10 @@ module.exports = (sequelize, DataTypes) => {
         email: DataTypes.STRING(100),
         re: DataTypes.INTEGER,
         senha: DataTypes.STRING(10)
-    });
+    }, {
+        freezeTableName: true,
+        timestamps: false  // <- desativa createdAt e updatedAt // <-- adicione esta linha
+      });
 
     Professor.associate = (models) => {
         Professor.hasMany(models.Trabalho, { foreignKey: 'professor_id' });
