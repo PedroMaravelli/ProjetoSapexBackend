@@ -1,13 +1,13 @@
 const { Op } = require("sequelize");
-const { Aluno, Trabalho, AlunoHasTrabalho } = require("../../database/models");
+const { Aluno, Trabalho, AlunoHasTrabalho, Professor } = require("../../database/models");
 
 const AlunoController = {
     login: async (req, res) =>{
             try {
-                const { ra, senha } = req.body;
+                const { email, senha } = req.body;
         
                 
-                const aluno = await Aluno.findOne({ where: { ra } });
+                const aluno = await Aluno.findOne({ where: { email } });
         
                 if (!aluno) {
                 return res.status(400).json({ message: "Usuário não encontrado" });
@@ -18,7 +18,7 @@ const AlunoController = {
                 return res.status(400).json({ message: "Senha incorreta" });
                 }
         
-                return res.status(200).json({ message: "Login bem-sucedido" });
+                return res.status(200).json({ message: "Login bem-sucedido" , id: aluno.id,});
             } catch (err) {
                 console.error(err);
                 return res.status(500).json({ message: "Erro no servidor" });
@@ -32,10 +32,16 @@ const AlunoController = {
             const trabalhos = await Trabalho.findAll({
             where: {
                 data: {
-                [Op.gte]: new Date(`${anoAtual}-01-01`),  // Início do ano
-                [Op.lt]: new Date(`${anoAtual + 1}-01-01`)  // Início do próximo ano
+                [Op.gte]: new Date(`${anoAtual}-01-01`),
+                [Op.lt]: new Date(`${anoAtual + 1}-01-01`)
                 }
-            }
+            },
+            include: [
+                {
+                model: Aluno,
+                as:"alunos"
+                }
+            ]
             });
             
             if (trabalhos.length > 0) {
@@ -57,7 +63,18 @@ const AlunoController = {
             include: [
                 {
                 model: Trabalho,
-                as: 'trabalho', // esse alias precisa estar correto no model
+                as: 'trabalho',
+                 include: [
+                        {
+                        model: Professor,
+                        as:"Professor"
+                        
+                        },
+                        {
+                            model: Aluno,
+                            as:"alunos"
+                        }
+                    ] 
                 }
             ]
             });
