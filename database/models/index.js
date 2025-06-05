@@ -25,6 +25,7 @@ db.AdminHasGuiaSapex = require('./AdminHasGuiaSapex')(sequelize, DataTypes);
 db.AlunoHasTrabalho = require('./AlunoHasTrabalho')(sequelize, DataTypes);
 
 
+
 // Criando as associações
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {

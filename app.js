@@ -4,9 +4,11 @@ const port = 3000
 const AdminRoutes = require("./Routes/Admin")
 const ProfessorRoutes = require("./Routes/Professor")
 const AlunoRoutes = require("./Routes/Aluno")
+const cors = require('cors');
 
 
 
+app.use(cors());
 app.use(express.json());
 app.use('/admin', AdminRoutes );
 app.use('/prof', ProfessorRoutes );

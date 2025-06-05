@@ -5,7 +5,7 @@ const AdminController = require('../Controllers/Admin/adminController');
 
 const router = express.Router();
 
-router.get("/login", AlunoController.login )
+router.post("/login", AlunoController.login )
 router.get("/trabalhos", AlunoController.TodosTrabalhos)
 router.get("/meustrabalhos/:aluno_id", AlunoController.MeusTrabalhos)
 router.get("/localizacao/:trabalhoId", ProfessorController.LocalizacaoTrabalho)

@@ -1,4 +1,4 @@
-const { Professor, Trabalho, AlunoHasTrabalho, Localizacao } = require("../../database/models");
+const { Professor, Trabalho, AlunoHasTrabalho, Localizacao, Aluno } = require("../../database/models");
 
 
 
@@ -19,7 +19,7 @@ const ProfessorController = {
                 return res.status(400).json({ message: "Senha incorreta" });
                 }
         
-                return res.status(200).json({ message: "Login bem-sucedido" });
+                return res.status(200).json({ message: "Login bem-sucedido", id: professor.id, });
             } catch (err) {
                 console.error(err);
                 return res.status(500).json({ message: "Erro no servidor" });
@@ -37,6 +37,12 @@ const ProfessorController = {
             include: [
                 {
                     model: Professor, 
+                    as:"Professor"
+                    
+                },
+                {
+                    model: Aluno, 
+                    as:"alunos"
                     
                 }
             ]
@@ -57,8 +63,8 @@ const ProfessorController = {
     },
     AtribuirNota: async(req, res) => {
     try {
-        const { alunoId, trabalhoId, justificativa_nota } = req.params;
-        const { nota } = req.body;
+        const { alunoId, trabalhoId } = req.params;
+        const { nota, justificativa_nota } = req.body;
 
         if (typeof nota !== 'number' || nota < 0 || nota > 10) {
             return res.status(400).json({ message: 'Nota inválida. Deve estar entre 0 e 10.' });
@@ -87,7 +93,8 @@ const ProfessorController = {
             const trabalho = await Trabalho.findOne({
             where: { id: trabalhoId },
             include: {
-                model: Localizacao, // Incluindo a tabela de Localizacao
+                model: Localizacao,
+                as:"Localizacao", // Incluindo a tabela de Localizacao
                 required: true // Isso garante que a localização será encontrada
             }
             });
