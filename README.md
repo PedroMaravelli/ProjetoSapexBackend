@@ -53,6 +53,9 @@ O servidor será iniciado em:
 http://localhost:3000
 ```
 
+## License
+
+[This project is licensed under CC0 1.0 Universal](https://creativecommons.org)
 
 
 
