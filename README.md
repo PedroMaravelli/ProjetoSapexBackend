@@ -59,7 +59,3 @@ http://localhost:3000
 
 
 
-## 👩‍🏫 Professora
-
-O projeto está pronto para ser executado localmente. Basta seguir os passos acima usando os mesmos dados de conexão do banco de dados.
-
