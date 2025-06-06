@@ -10,9 +10,12 @@ router.post('/cadastrolocalizacao', AdminController.CadastroLocalizacao);
 
 
 
-router.get('/listatrabalhos', AdminController.ListaTrabalhos);  
-router.get('/guia', AdminController.ListaInstrucao);  
-router.get('/login', AdminController.Login);
+router.get('/listatrabalhos', AdminController.ListaTrabalhos); 
+router.get('/infostrabalho/:id', AdminController.InfosTrabalho); 
+
+router.get('/guia', AdminController.ListaInstrucao); 
+ 
+router.post('/login', AdminController.Login);
 
 
 module.exports = router;
