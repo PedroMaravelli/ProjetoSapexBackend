@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { Aluno, Trabalho, AlunoHasTrabalho, Professor } = require("../../database/models");
+const { Aluno, Trabalho, AlunoHasTrabalho, Professor, Localizacao } = require("../../database/models");
 
 const AlunoController = {
     login: async (req, res) =>{
@@ -105,7 +105,12 @@ const AlunoController = {
                 {
                 model: Trabalho,
                 as: 'trabalho'
-                }
+                },
+                {
+                model: Aluno,
+                as: 'aluno'
+                },
+                
             ]
             });
 
@@ -116,7 +121,8 @@ const AlunoController = {
             const resultado = {
             nota: relacao.nota,
             justificativa_nota: relacao.justificativa_nota,
-            trabalho: relacao.trabalho
+            trabalho: relacao.trabalho,
+            aluno:relacao.aluno
             };
 
             res.json(resultado);
