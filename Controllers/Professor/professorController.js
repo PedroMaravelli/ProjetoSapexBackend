@@ -85,6 +85,62 @@ const ProfessorController = {
         return res.status(500).json({ message: 'Erro interno ao atribuir nota.' });
     }
 },
+    NotaAluno: async (req,res) =>{
+       const { professor_id } = req.params;
+
+try {
+    const relacoes = await AlunoHasTrabalho.findAll({
+        where: {
+            nota: null
+        },
+        include: [
+            {
+                model: Trabalho,
+                as: 'trabalho',
+                where: { professor_id }
+            },
+            {
+                model: Aluno,
+                as: 'aluno'
+            }
+        ]
+    });
+
+    if (!relacoes || relacoes.length === 0) {
+        return res.status(404).json({ message: 'Nenhuma relação pendente encontrada para esse professor.' });
+    }
+
+    // Agrupar trabalhos com seus respectivos alunos
+    const trabalhosMap = {};
+
+    relacoes.forEach(relacao => {
+        const trabalhoId = relacao.trabalho.id;
+
+        if (!trabalhosMap[trabalhoId]) {
+            trabalhosMap[trabalhoId] = {
+                trabalho: relacao.trabalho,
+                alunos: []
+            };
+        }
+
+        trabalhosMap[trabalhoId].alunos.push({
+            id: relacao.aluno.id,
+            nome: relacao.aluno.nome,
+            email: relacao.aluno.email,
+            ra: relacao.aluno.ra,
+            turma: relacao.aluno.turma
+        });
+    });
+
+    const resultado = Object.values(trabalhosMap);
+
+    res.json(resultado);
+} catch (error) {
+    console.error('Erro ao buscar dados:', error);
+    res.status(500).json({ message: 'Erro ao buscar trabalhos pendentes do professor.' });
+}
+
+            },
     LocalizacaoTrabalho: async (req,res) => {
         try {
             const trabalhoId = req.params.trabalhoId;
