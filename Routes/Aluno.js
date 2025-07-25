@@ -2,10 +2,12 @@ const express = require('express');
 const AlunoController = require('../Controllers/Aluno/alunoController');
 const ProfessorController = require('../Controllers/Professor/professorController');
 const AdminController = require('../Controllers/Admin/adminController');
+const AuthAlunoController = require('../Controllers/Aluno/authAlunoController');
+
 
 const router = express.Router();
 
-router.post("/login", AlunoController.login )
+router.post("/login", AuthAlunoController.login )
 router.get("/trabalhos", AlunoController.TodosTrabalhos)
 router.get("/meustrabalhos/:aluno_id", AlunoController.MeusTrabalhos)
 router.get("/localizacao/:trabalhoId", ProfessorController.LocalizacaoTrabalho)
