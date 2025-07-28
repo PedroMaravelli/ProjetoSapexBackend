@@ -1,5 +1,4 @@
 const { Trabalho, Aluno, Professor, Localizacao, Admin, GuiaSapex, AlunoHasTrabalho } = require('../../database/models');  // Importando todos os modelos necessário
-const bcrypt = require('bcrypt');
 
 
 
@@ -8,9 +7,6 @@ const AdminController = {
         try {
         const { titulo, tipo, n_poster, data, horario, localizacao, professor, alunos } = req.body;
 
-        if (!titulo || !tipo || !n_poster || !data || !horario || !localizacao || !professor || !alunos || alunos.length === 0) {
-            return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
-        }
 
         // 1. Criar localização
         const novaLocalizacao = await Localizacao.create({
@@ -99,11 +95,6 @@ const AdminController = {
         try {
             const { titulo, descricao } = req.body;
         
-            
-            if (!titulo || !descricao ) {
-                return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
-            }
-        
             const novaInstrucao = await GuiaSapex.create({
                 titulo,
                 descricao
@@ -139,7 +130,7 @@ const AdminController = {
         
             
             if (!predio || !sala || !ponto_referencia ) {
-              return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
+                return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
             }
         
             const localizacao = await Localizacao.create({
@@ -155,29 +146,29 @@ const AdminController = {
         }
     },
     InfosTrabalho: async (req,res) => {
-    const { id } = req.params;
+        const { id } = req.params;
 
-    try {
-    const trabalho = await Trabalho.findByPk(id, {
-        include: [
-        {model: Aluno,
-            as: "alunos", // esse "as" deve ser igual ao definido em Trabalho.associate()
-            through: { attributes: [] } },      
-        { model: Professor, as: "Professor"},
-        { model:Localizacao, as: 'Localizacao' },
-        ],
-    });
+        try {
+        const trabalho = await Trabalho.findByPk(id, {
+            include: [
+            {model: Aluno,
+                as: "alunos", 
+                through: { attributes: [] } },      
+            { model: Professor, as: "Professor"},
+            { model:Localizacao, as: 'Localizacao' },
+            ],
+        });
 
-    if (!trabalho) {
-        return res.status(404).json({ error: 'Trabalho não encontrado' });
-    }
+        if (!trabalho) {
+            return res.status(404).json({ error: 'Trabalho não encontrado' });
+        }
 
-    return res.json(trabalho);
-    } catch (error) {
-    console.error('Erro ao buscar trabalho por ID:', error);
-    return res.status(500).json({ error: 'Erro interno do servidor' });
-    }
-    },
-};
+        return res.json(trabalho);
+        } catch (error) {
+        console.error('Erro ao buscar trabalho por ID:', error);
+        return res.status(500).json({ error: 'Erro interno do servidor' });
+        }
+        },
+    };
 
 module.exports = AdminController;  
