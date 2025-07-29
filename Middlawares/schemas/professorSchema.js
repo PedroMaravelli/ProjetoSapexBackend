@@ -1,9 +1,5 @@
 const { z } = require("zod");
 
-const professorSchema = z.object({
-    senha: z.string().min(5),
-    email:z.string().email().includes("@"),
-})
 
 
 const atribuirNotaParamsSchema = z.object({
@@ -22,7 +18,6 @@ const atribuirNotaBodySchema = z.object({
 
 
 module.exports = {
-    professorSchema,
     atribuirNotaParamsSchema,
     atribuirNotaBodySchema,
 };

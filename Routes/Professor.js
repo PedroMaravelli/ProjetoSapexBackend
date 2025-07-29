@@ -1,16 +1,16 @@
 const express = require('express');
 const ProfessorController = require('../Controllers/Professor/professorController');
-const AuthProfessorController = require('../Controllers/Professor/authProfessorController');
-
-const authProfessorMiddleware = require("../Middlawares/Professor/authProfessorMiddleware")
-const {professorSchema} = require("../Middlawares/schemas/professorSchema")
-
 const atribuirNotaProfessorMiddleware = require("../Middlawares/Professor/atribuirNotaProfessorMiddleware")
 const {atribuirNotaParamsSchema, atribuirNotaBodySchema} = require("../Middlawares/schemas/professorSchema")
 
 const router = express.Router();
+const AuthController = require('../Controllers/AuthController');
 
-router.post("/login",authProfessorMiddleware(professorSchema), AuthProfessorController.Login)
+
+router.get('/auth/google', AuthController.initiateGoogleAuth);
+
+router.get('/google/callback', AuthController.handleGoogleCallback);
+
 
 router.get("/trabalhos/:id", ProfessorController.TrabalhosPorProfessor)
 router.get('/localizacao/:trabalhoId/', ProfessorController.LocalizacaoTrabalho);

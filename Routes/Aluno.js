@@ -2,15 +2,16 @@ const express = require('express');
 const AlunoController = require('../Controllers/Aluno/alunoController');
 const ProfessorController = require('../Controllers/Professor/professorController');
 const AdminController = require('../Controllers/Admin/adminController');
-const AuthAlunoController = require('../Controllers/Aluno/authAlunoController');
-
-const authAlunoMiddleware = require = ('../Middlawares/Aluno/authAlunoMiddleware.js')
-const { alunoSchema} = require('../Middlawares/schemas/alunoSchema')
-
-
+const AuthController = require('../Controllers/AuthController');
 const router = express.Router();
 
-router.post("/login", authAlunoMiddleware(alunoSchema), AuthAlunoController.login )
+
+
+router.get('/auth/google', AuthController.initiateGoogleAuth);
+
+router.get('/auth/google/callback', AuthController.handleGoogleCallback);
+
+
 router.get("/trabalhos", AlunoController.TodosTrabalhos)
 router.get("/meustrabalhos/:aluno_id", AlunoController.MeusTrabalhos)
 router.get("/localizacao/:trabalhoId", ProfessorController.LocalizacaoTrabalho)
