@@ -7,11 +7,15 @@ const cadastroGuiaSapexMiddleware = require("../Middlawares/Admin/cadastroGuiaSa
 
 const {cadastroTrabalhosAdminSchema} = require("../Middlawares/schemas/adminSchemaValidation")
 const {cadastroGuiaSapexSchema} = require("../Middlawares/schemas/adminSchemaValidation")
+const AuthController = require('../Controllers/AuthController');
 
 
-router.post('/login', AuthAdminController.Login);
-router.post('/cadastrotrabalhos',cadastroTrabalhosMiddleware(cadastroTrabalhosAdminSchema), AdminController.CadastroTrabalhos);
-router.post('/guia/cadastro', cadastroGuiaSapexMiddleware(cadastroGuiaSapexSchema), AdminController.CadastroInstrucao);
+router.get('/auth/google', AuthController.initiateGoogleAuth);
+
+router.get('/auth/google/callback', AuthController.handleGoogleCallback);
+
+router.post('/cadastrotrabalhos', AdminController.CadastroTrabalhos);
+router.post('/guia/cadastro', AdminController.CadastroInstrucao);
 router.post('/cadastrolocalizacao', AdminController.CadastroLocalizacao);
 
 
