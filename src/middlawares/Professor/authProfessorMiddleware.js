@@ -1,4 +1,4 @@
-const cadastroGuiaSapexMiddleware = (schema) => (req, res, next) => {
+const authProfessorMiddleware = (schema) => (req, res, next) => {
     const result = schema.safeParse(req.body);
     if (!result.success) {
         return res.status(400).json({
@@ -12,3 +12,5 @@ const cadastroGuiaSapexMiddleware = (schema) => (req, res, next) => {
     req.validatedBody = result.data;
     next();
 };
+
+module.exports = authProfessorMiddleware;
