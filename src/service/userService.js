@@ -6,12 +6,12 @@ class UserService {
 
         const emailLower = email.toLowerCase();
 
-        // Administrador específico
+
         if (emailLower === 'admin@fsa.br') {
         return 'administrador';
         }
 
-        // Verificação por domínio
+
         if (emailLower.endsWith('@graduacao.fsa.br')) {
         return 'aluno';
         }
@@ -21,7 +21,7 @@ class UserService {
         }
 
         // Email não autorizado
-        throw new Error('Email não pertence ao domínio institucional autorizado');
+        throw new Error('Email não pertence ao domínio institucional da Fundação Santo André autorizado');
     }
 
     static validateInstitutionalEmail(email) {

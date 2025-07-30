@@ -1,6 +1,6 @@
 const passport = require('passport');
 const JwtService = require('../config/jwtConfig');
-const UserService = require('../config/userService');
+const UserService = require('../service/userService');
 const { Aluno, Professor } = require('../database/models');
 
 class AuthController {
@@ -15,7 +15,6 @@ class AuthController {
         passport.authenticate('google', { session: false }, async (err, user) => {
         try {
             if (err) {
-            console.error('Erro na autenticação:', err);
             return res.status(500).json({
                 error: 'Erro interno durante autenticação',
                 message: 'Tente novamente mais tarde'
