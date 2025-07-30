@@ -1,3 +1,4 @@
 node_modules
 .env
-database/config/config.json
+/src/config/config.json
+/src/database/models/index.js
