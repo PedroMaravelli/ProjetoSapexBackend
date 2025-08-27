@@ -49,27 +49,36 @@ class AuthController {
 
             const token = JwtService.generateToken(tokenPayload);
 
-            if(userData.role === 'professor'){
-                const professor = await Professor.create({
-                    nome: userData.name,
-                    email: userData.email,
-            });
-            }
-            if(userData.role === 'aluno'){
-                const aluno = await Aluno.create({
-                    nome: userData.name,
-                    email: userData.email,
-            });
+            // if(userData.role === 'professor'){
+            //     const professor = await Professor.create({
+            //         nome: userData.name,
+            //         email: userData.email,
+            //         re: 1
+            // });
+            // }
+            // if(userData.role === 'aluno'){
+            //     const aluno = await Aluno.create({
+            //         nome: userData.name,
+            //         email: userData.email,
+            //         ra: 1
+            // });
 
-            }
+            // }
             
 
-            // Resposta de sucesso
-            return res.status(200).json({
-            token: token,
-            user: userData,
-            message: 'Autenticação realizada com sucesso'
-            });
+            if(userData.role === "professor"){
+                const redirectUrl = `http://localhost:5173/prof?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
+                return res.redirect(redirectUrl);
+            }
+            if(userData.role === "aluno"){
+                const redirectUrl = `http://localhost:5173/alunos?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
+                return res.redirect(redirectUrl);
+            }
+            if(userData.role === "admin"){
+                const redirectUrl = `http://localhost:5173/admin/listatrabalhos?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
+                return res.redirect(redirectUrl);
+            }
+
 
         } catch (error) {
             console.error('Erro no callback:', error);
