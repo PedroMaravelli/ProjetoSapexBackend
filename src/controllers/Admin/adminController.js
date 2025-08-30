@@ -7,23 +7,19 @@ const AdminController = {
         try {
         const { titulo, tipo, n_poster, data, horario, localizacao, professor, alunos } = req.body;
 
-
-        // 1. Criar localização
         const novaLocalizacao = await Localizacao.create({
             predio: localizacao.predio,
             sala: localizacao.sala,
             ponto_referencia: localizacao.ponto_referencia
         });
 
-        // 2. Buscar ou criar professor
+
         let professorExistente = await Professor.findOne({ where: { email: professor.email } });
 
         if (!professorExistente) {
             professorExistente = await Professor.create({
                 nome: professor.nome,
                 email: professor.email,
-                re: professor.re,
-                senha: '123456' // senha padrão, ajuste conforme sua lógica
             });
         }
 

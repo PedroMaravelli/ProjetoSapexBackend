@@ -7,7 +7,7 @@ class AuthController {
     static initiateGoogleAuth(req, res, next) {
         passport.authenticate('google', {
         scope: ['profile', 'email'],
-        hd: 'fsa.br' // Restringe ao domínio da instituição
+        hd: 'fsa.br' 
         })(req, res, next);
     }
 
@@ -36,46 +36,48 @@ class AuthController {
             });
             }
 
-            // Formatar dados do usuário
+            
             const userData = UserService.formatUserResponse(user);
 
-            // Gerar token JWT
+            
             const tokenPayload = {
             userId: user.googleId,
             email: user.email,
             role: userData.role,
             name: user.name
             };
+            
 
             const token = JwtService.generateToken(tokenPayload);
 
-            // if(userData.role === 'professor'){
-            //     const professor = await Professor.create({
-            //         nome: userData.name,
-            //         email: userData.email,
-            //         re: 1
-            // });
-            // }
-            // if(userData.role === 'aluno'){
-            //     const aluno = await Aluno.create({
-            //         nome: userData.name,
-            //         email: userData.email,
-            //         ra: 1
-            // });
-
-            // }
+            const professorExists = await Professor.findOne({ where: { email: userData.email, nome: userData.name } });
+            const alunoExists = await Aluno.findOne({ where: { email: userData.email , nome: userData.name} });
             
 
+            if(!professorExists && userData.role === "professor"){
+                await Professor.create({
+                nome: userData.name,
+                email: userData.email,
+                });
+            }
+            if(!alunoExists && userData.role === "aluno"){
+                await Aluno.create({
+                nome: userData.name,
+                email: userData.email,
+                });
+            }
+
+
             if(userData.role === "professor"){
-                const redirectUrl = `http://localhost:5173/prof?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
+                const redirectUrl = `http://localhost:5173/auth/callback?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
                 return res.redirect(redirectUrl);
             }
             if(userData.role === "aluno"){
-                const redirectUrl = `http://localhost:5173/alunos?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
+                const redirectUrl = `http://localhost:5173/auth/callback?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
                 return res.redirect(redirectUrl);
             }
             if(userData.role === "admin"){
-                const redirectUrl = `http://localhost:5173/admin/listatrabalhos?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
+                const redirectUrl = `http://localhost:5173/auth/callback?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
                 return res.redirect(redirectUrl);
             }
 
