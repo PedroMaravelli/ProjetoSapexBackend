@@ -44,7 +44,7 @@ jobs:
           docker run --rm -v $PWD:/out anchore/grype:latest \
             sbom:/out/syft-cdx.json -o json > grype.json
 
-      - name: Trivy (filesystem: vuln + config + secret)
+      - name: "Trivy (filesystem: vuln + config + secret)"   # ← ASPAS AQUI
         run: |
           docker run --rm -v $PWD:/work -v $PWD:/out aquasec/trivy:latest \
             fs --scanners vuln,config,secret -f json -o /out/trivy.json /work
@@ -64,15 +64,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Sobe sua API (usa o docker-compose.yml da raiz)
       - name: Subir app + db (docker-compose)
         run: docker compose up -d --build
 
-      # (opcional) ver estado dos containers para debug
       - name: Ver estado dos containers
         run: docker compose ps
 
-      # Espera a rota /health responder 200 antes dos scanners
       - name: Esperar API responder
         run: |
           for i in {1..60}; do
@@ -128,10 +125,8 @@ jobs:
           python-version: "3.12"
       - run: |
           pip install docxtpl pyyaml
-          # (opcional) enriquecer priorização com EPSS e CISA KEV
           curl -sS https://api.first.org/data/v1/epss?per_page=200000 > epss.json || true
           curl -sS https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json > kev.json || true
-          # (opcional) screenshots dos HTML do ZAP (wkhtmltoimage via wkhtmltopdf)
           sudo apt-get update && sudo apt-get install -y wkhtmltopdf || true
           python tools/make_report.py artifacts relatorio.docx . --openapi "openapi.yaml,openapi.json" --epss epss.json --kev kev.json --snap-zap
       - uses: actions/upload-artifact@v4
