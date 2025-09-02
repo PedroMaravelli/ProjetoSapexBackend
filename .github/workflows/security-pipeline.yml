@@ -1,0 +1,140 @@
+name: Security CI (DAST + SAST + SCA + SBOM + Report)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch: {}
+
+concurrency:
+  group: security-main
+  cancel-in-progress: true
+
+jobs:
+  # --- SAST --------------------------------------------------------------
+  sast-semgrep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          pipx install semgrep
+          semgrep ci --config=auto --json --output semgrep.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: semgrep
+          path: semgrep.json
+
+  # --- SCA / SBOM / FS+IaC+Secrets --------------------------------------
+  sca-sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: OSV-Scanner (dependências)
+        run: |
+          docker run --rm -v $PWD:/src ghcr.io/google/osv-scanner:latest \
+            --all-projects --json > osv.json
+
+      - name: Syft (gera SBOM CycloneDX)
+        run: |
+          docker run --rm -v $PWD:/work -v $PWD:/out anchore/syft:latest \
+            dir:/work -o cyclonedx-json=/out/syft-cdx.json
+
+      - name: Grype (CVEs a partir do SBOM)
+        run: |
+          docker run --rm -v $PWD:/out anchore/grype:latest \
+            sbom:/out/syft-cdx.json -o json > grype.json
+
+      - name: Trivy (filesystem: vuln + config + secret)
+        run: |
+          docker run --rm -v $PWD:/work -v $PWD:/out aquasec/trivy:latest \
+            fs --scanners vuln,config,secret -f json -o /out/trivy.json /work
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sca-sbom
+          path: |
+            osv.json
+            syft-cdx.json
+            grype.json
+            trivy.json
+
+  # --- DAST local: sobe app com Compose e roda ZAP/Dalfox/sqlmap --------
+  dast-local:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Sobe sua API (usa o docker-compose.yml da raiz)
+      - name: Subir app + db (docker-compose)
+        run: docker compose up -d --build
+
+      # (opcional) ver estado dos containers para debug
+      - name: Ver estado dos containers
+        run: docker compose ps
+
+      # Espera a rota /health responder 200 antes dos scanners
+      - name: Esperar API responder
+        run: |
+          for i in {1..60}; do
+            if curl -fsS http://localhost:3000/health >/dev/null; then echo "UP"; exit 0; fi
+            sleep 2
+          done
+          echo "App não respondeu na porta 3000"; exit 1
+
+      - name: ZAP Baseline (passivo) — seguro p/ produção
+        run: |
+          docker run --rm --network host -v $PWD:/zap/wrk ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py -t http://localhost:3000 -I \
+            -J /zap/wrk/zap-baseline.json -r /zap/wrk/zap-baseline.html
+
+      - name: ZAP Full (ativo) — preferir ambiente de staging
+        run: |
+          docker run --rm --network host -v $PWD:/zap/wrk ghcr.io/zaproxy/zaproxy:stable \
+            zap-full-scan.py -t http://localhost:3000 \
+            -J /zap/wrk/zap-full.json -r /zap/wrk/zap-full.html || true
+
+      - name: Dalfox (XSS)
+        run: |
+          docker run --rm --network host -v $PWD:/out hahwul/dalfox:latest \
+            url http://localhost:3000 -o /out/dalfox.json -f json || true
+
+      - name: sqlmap (SQLi) — exemplo
+        run: |
+          docker run --rm --network host -v $PWD:/out paoloo/sqlmap \
+            -u "http://localhost:3000/?id=1" --batch --output-dir=/out || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dast-local
+          path: |
+            zap-baseline.json
+            zap-baseline.html
+            zap-full.json
+            zap-full.html
+            dalfox.json
+            output/**
+
+  # --- Consolidação → DOCX ----------------------------------------------
+  report:
+    runs-on: ubuntu-latest
+    needs: [sast-semgrep, sca-sbom, dast-local]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          pip install docxtpl pyyaml
+          # (opcional) enriquecer priorização com EPSS e CISA KEV
+          curl -sS https://api.first.org/data/v1/epss?per_page=200000 > epss.json || true
+          curl -sS https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json > kev.json || true
+          # (opcional) screenshots dos HTML do ZAP (wkhtmltoimage via wkhtmltopdf)
+          sudo apt-get update && sudo apt-get install -y wkhtmltopdf || true
+          python tools/make_report.py artifacts relatorio.docx . --openapi "openapi.yaml,openapi.json" --epss epss.json --kev kev.json --snap-zap
+      - uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: relatorio.docx

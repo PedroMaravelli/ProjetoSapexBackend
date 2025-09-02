@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sapex-backend
+    ports:
+      - "3000:3000"   
+    volumes:
+      - .:/usr/src/app           
+      - /usr/src/app/node_modules 
+    command: npm run start         
