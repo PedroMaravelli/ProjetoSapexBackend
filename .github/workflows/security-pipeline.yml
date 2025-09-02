@@ -2,7 +2,7 @@ name: Security CI (DAST + SAST + SCA + SBOM + Report)
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "feature/**"]
   workflow_dispatch: {}
 
 concurrency:
