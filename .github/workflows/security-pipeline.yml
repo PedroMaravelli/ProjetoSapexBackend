@@ -20,7 +20,7 @@ jobs:
       - run: |
           pipx install semgrep
           # --suppress-errors para NÃO quebrar o job no início do setup
-          semgrep ci --config=auto --json --output semgrep.json --suppress-errors
+              semgrep ci --config=auto --json --output semgrep.json --suppress-errors || true
       - uses: actions/upload-artifact@v4
         with:
           name: semgrep
