@@ -19,7 +19,7 @@ require('dotenv').config({ path:'.env' });
 //   PASSWORD: 'root',
 //   DATABASE: 'mydb',
 // };
-const ENV = { ...DEFAULTS, ...process.env };
+const ENV = { ...process.env };
 const PORT = parseInt(ENV.PORT, 10) || 3000;
 
 const AdminRoutes = require('./src/routes/adminRoutes');
