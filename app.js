@@ -3,22 +3,22 @@ const express = require('express');
 const app = express();
 
 // Lê .env/.env.ci se existir; se não, seguimos com defaults
-require('dotenv').config({ path: process.env.DOTENV_FILE || '.env' });
+require('dotenv').config({ path:'.env' });
 
 // Defaults (podem ser sobrescritos por variáveis reais do ambiente)
-const DEFAULTS = {
-  NODE_ENV: 'ci',
-  PORT: '3000',
-  CORS_ORIGIN: '*',
-  SESSION_SECRET: 'changeme',
-  JWT_SECRET: 'changeme',
-  GOOGLE_CLIENT_ID: 'dummy',
-  GOOGLE_CLIENT_SECRET: 'dummy',
-  DB_HOST: 'db',
-  DB_USER: 'root',
-  DB_PASS: 'root',
-  DB_NAME: 'mydb',
-};
+// const DEFAULTS = {
+//   NODE_ENV: 'ci',
+//   PORT: '3000',
+//   CORS_ORIGIN: '*',
+//   SESSION_SECRET: 'changeme',
+//   JWT_SECRET: 'changeme',
+//   CLIENT_ID: 'dummy',
+//   GOOGLE_CLIENT_SECRET: 'dummy',
+//   HOST: 'db',
+//   USERNAME: 'root',
+//   PASSWORD: 'root',
+//   DATABASE: 'mydb',
+// };
 const ENV = { ...DEFAULTS, ...process.env };
 const PORT = parseInt(ENV.PORT, 10) || 3000;
 
@@ -31,10 +31,7 @@ const session = require('express-session');
 const cors = require('cors');
 
 // CORS: '*' => libera; lista separada por vírgula => restringe
-const corsOrigin =
-  !ENV.CORS_ORIGIN || ENV.CORS_ORIGIN.trim() === '*'
-    ? true
-    : ENV.CORS_ORIGIN.split(',').map(s => s.trim());
+const corsOrigin ='http://localhost:5172/'
 app.use(cors({ origin: corsOrigin, credentials: true }));
 
 app.use(express.json());
