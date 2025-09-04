@@ -19,31 +19,44 @@ from pathlib import Path
 from collections import defaultdict, Counter
 from docxtpl import DocxTemplate, InlineImage
 from docx.shared import Mm
+from docx import Document  # <-- para gerar DOCX fallback
 import yaml
 
 # ---------- utils ----------
 def load_json(p: Path):
-    try: return json.loads(p.read_text(encoding="utf-8"))
-    except: return None
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except:
+        return None
 
 def load_yaml(p: Path):
-    try: return yaml.safe_load(p.read_text(encoding="utf-8"))
-    except: return None
+    try:
+        return yaml.safe_load(p.read_text(encoding="utf-8"))
+    except:
+        return None
 
 def find_first(base: Path, candidates):
     for c in candidates:
         q = base / c
-        if q.exists(): return q
+        if q.exists():
+            return q
     return None
 
 def cvss_bucket(score):
-    if score is None: return "Unknown"
-    try: s = float(score)
-    except: return "Unknown"
-    if s >= 9.0: return "Critical"
-    if s >= 7.0: return "High"
-    if s >= 4.0: return "Medium"
-    if s > 0.0:  return "Low"
+    if score is None:
+        return "Unknown"
+    try:
+        s = float(score)
+    except:
+        return "Unknown"
+    if s >= 9.0:
+        return "Critical"
+    if s >= 7.0:
+        return "High"
+    if s >= 4.0:
+        return "Medium"
+    if s > 0.0:
+        return "Low"
     return "None"
 
 CWE_REMEDIATIONS = {
@@ -99,8 +112,10 @@ def load_openapi(repo_dir: Path, names: list[str]):
     for name in names:
         fp = repo_dir/name
         if fp.exists():
-            if fp.suffix in (".yaml",".yml"): return (load_yaml(fp) or {}, fp)
-            if fp.suffix == ".json":         return (load_json(fp) or {}, fp)
+            if fp.suffix in (".yaml",".yml"):
+                return (load_yaml(fp) or {}, fp)
+            if fp.suffix == ".json":
+                return (load_json(fp) or {}, fp)
     return {}, None
 
 def load_epss(path: Path):
@@ -108,10 +123,13 @@ def load_epss(path: Path):
     mp = {}
     for row in (data.get("data") or []):
         cve = row.get("cve")
-        if not cve: continue
+        if not cve:
+            continue
         def f(x):
-            try: return float(x)
-            except: return None
+            try:
+                return float(x)
+            except:
+                return None
         mp[cve] = {"epss": f(row.get("epss")), "percentile": f(row.get("percentile"))}
     return mp
 
@@ -138,9 +156,12 @@ def aggregate_zap_by_cwe(alerts):
 def consolidate_cvss(grype_matches, trivy_results):
     buckets = Counter()
     def add(score=None, sev=None):
-        if score is not None: buckets[cvss_bucket(score)] += 1
-        elif sev: buckets[sev.capitalize() if sev and sev.capitalize() in ("Critical","High","Medium","Low") else "Unknown"] += 1
-        else: buckets["Unknown"] += 1
+        if score is not None:
+            buckets[cvss_bucket(score)] += 1
+        elif sev:
+            buckets[sev.capitalize() if sev and sev.capitalize() in ("Critical","High","Medium","Low") else "Unknown"] += 1
+        else:
+            buckets["Unknown"] += 1
 
     for m in grype_matches:
         score = None
@@ -156,10 +177,12 @@ def consolidate_cvss(grype_matches, trivy_results):
             if isinstance(cv, dict):
                 for src in ("nvd","redhat","ghsa"):
                     base = cv.get(src,{}).get("V3Score") or cv.get(src,{}).get("Score")
-                    if base: score = max(score or 0.0, float(base))
+                    if base:
+                        score = max(score or 0.0, float(base))
             add(score=score, sev=v.get("Severity"))
 
-    for k in ("Critical","High","Medium","Low","Unknown"): buckets[k] += 0
+    for k in ("Critical","High","Medium","Low","Unknown"):
+        buckets[k] += 0
     return dict(buckets)
 
 # ---------- correlation ----------
@@ -178,28 +201,36 @@ def build_openapi_map(openapi):
     paths = openapi.get("paths",{}) if isinstance(openapi,dict) else {}
     mp = {}
     for pth, methods in paths.items():
-        if not isinstance(methods, dict): continue
+        if not isinstance(methods, dict):
+            continue
         for meth, meta in methods.items():
-            if not isinstance(meta, dict): continue
+            if not isinstance(meta, dict):
+                continue
             opid = meta.get("operationId")
-            if opid: mp[(pth, meth.lower())] = opid
+            if opid:
+                mp[(pth, meth.lower())] = opid
     return mp
 
 def search_repo(repo_dir: Path, needles, exts=None, max_hits=5):
     if exts is None:
         exts = (".js",".ts",".tsx",".py",".java",".go",".rb",".php",".cs",".jsp",".vue")
     hits=[]; files=[]
-    for ext in exts: files += list(repo_dir.rglob(f"*{ext}"))
+    for ext in exts:
+        files += list(repo_dir.rglob(f"*{ext}"))
     for fp in files:
-        try: txt = fp.read_text(encoding="utf-8", errors="ignore")
-        except: continue
+        try:
+            txt = fp.read_text(encoding="utf-8", errors="ignore")
+        except:
+            continue
         for needle in needles:
-            if not needle: continue
+            if not needle:
+                continue
             if needle in txt:
                 for i, line in enumerate(txt.splitlines(), start=1):
                     if needle in line:
                         hits.append({"file": str(fp), "line": i, "reason": f"match '{needle}'"})
-                        if len(hits) >= max_hits: return hits
+                        if len(hits) >= max_hits:
+                            return hits
     return hits
 
 def correlate(zap_alerts, semgrep_results, repo_dir: Path=None, openapi=None):
@@ -218,13 +249,17 @@ def correlate(zap_alerts, semgrep_results, repo_dir: Path=None, openapi=None):
         if openapi and endpoint:
             seg_e = [s for s in endpoint.split("/") if s]
             for (opath, m), opid in op_map.items():
-                if method and m != method: continue
+                if method and m != method:
+                    continue
                 seg_o = [s for s in opath.split("/") if s]
-                if len(seg_e) != len(seg_o): continue
+                if len(seg_e) != len(seg_o):
+                    continue
                 ok = True
                 for se, so in zip(seg_e, seg_o):
-                    if so.startswith("{") and so.endswith("}"): continue
-                    if se != so: ok = False; break
+                    if so.startswith("{") and so.endswith("}"):
+                        continue
+                    if se != so:
+                        ok = False; break
                 if ok and repo_dir:
                     corr[key] += search_repo(repo_dir, [opid])
 
@@ -255,12 +290,15 @@ def snapshot_zap(art_dir: Path):
         html = art_dir/sub/"zap-full.html" if sub=="dast-local" else art_dir/sub/"report_html.html"
         if not html.exists():
             html = art_dir/sub/"zap-baseline.html" if sub=="dast-local" else html
-        if not html or not html.exists(): continue
+        if not html or not html.exists():
+            continue
         png  = html.with_suffix(".png")
         try:
             subprocess.run(["wkhtmltoimage", str(html), str(png)], check=False)
-            if png.exists(): snaps.append(png)
+            if png.exists():
+                snaps.append(png)
         except FileNotFoundError:
+            # wkhtmltoimage não instalado: ignore snapshots
             pass
     return snaps
 
@@ -297,7 +335,8 @@ def build_doc(art_dir: Path, out_docx: Path, repo_dir: Path=None, openapi_names=
 
     top=[]
     for cwe,data in cwe_sum.items():
-        if cwe==0 and not data["samples"]: continue
+        if cwe==0 and not data["samples"]:
+            continue
         mode = data["risk"].most_common(1)[0][0] if data["risk"] else "Unknown"
         top.append({
             "cwe": cwe, "name": data["name"] or "Unknown",
@@ -322,7 +361,8 @@ def build_doc(art_dir: Path, out_docx: Path, repo_dir: Path=None, openapi_names=
         score=None
         for x in (vuln.get("cvss") or []):
             bs = x.get("metrics",{}).get("baseScore") or x.get("baseScore")
-            if bs is not None: score = max(score or 0.0, float(bs))
+            if bs is not None:
+                score = max(score or 0.0, float(bs))
         add_p(cve,pkg,score,vuln.get("severity"),"grype")
     for res in trivy or []:
         for v in (res.get("Vulnerabilities") or []):
@@ -331,7 +371,8 @@ def build_doc(art_dir: Path, out_docx: Path, repo_dir: Path=None, openapi_names=
             if isinstance(cv,dict):
                 for src in ("nvd","redhat","ghsa"):
                     base = cv.get(src,{}).get("V3Score") or cv.get(src,{}).get("Score")
-                    if base: score=max(score or 0.0, float(base))
+                    if base:
+                        score=max(score or 0.0, float(base))
             add_p(cve,pkg,score,v.get("Severity"),"trivy")
 
     def prio_key(x): return (1 if x.get("kev") else 0, (x.get("epss") or 0.0), (x.get("cvss") or 0.0))
@@ -353,15 +394,43 @@ def build_doc(art_dir: Path, out_docx: Path, repo_dir: Path=None, openapi_names=
         "zap_images": []
     }
 
-    tpl = DocxTemplate(Path("tools/template.docx"))
-    images=[]
-    for p in snaps:
-        try: images.append(InlineImage(tpl, str(p), width=Mm(160)))
-        except: pass
-    ctx["zap_images"]=images
+    # --- Template: tenta usar tools/template.docx; se não der, cai no fallback ---
+    tpl_path = find_first(Path("."), ["tools/template.docx", "template.docx"])
 
-    tpl.render(ctx)
-    tpl.save(out_docx)
+    def save_fallback(out_docx, totals, cvss_sum, top):
+        """Gera um DOCX simples quando o template está ausente/corrompido."""
+        doc = Document()
+        doc.add_heading('Security Report (fallback)', 0)
+        doc.add_paragraph(f"ZAP findings: {totals['zap_findings']}")
+        doc.add_paragraph(f"Semgrep findings: {totals['semgrep_findings']}")
+        doc.add_paragraph(f"Grype matches: {totals['grype_matches']}")
+        doc.add_paragraph(f"Trivy issues: {totals['trivy_issues']}")
+        doc.add_paragraph(f"OSV vulns: {totals['osv_vulns']}")
+        doc.add_paragraph(f"CVSS summary: {cvss_sum}")
+        doc.add_paragraph("Top CWEs:")
+        for t in top[:10]:
+            doc.add_paragraph(f"- CWE-{t['cwe']} {t['name']} ({t['count']}) → {t['remediation']}")
+        doc.save(out_docx)
+
+    try:
+        if not tpl_path or not tpl_path.exists():
+            raise FileNotFoundError("template.docx não encontrado")
+
+        tpl = DocxTemplate(tpl_path)
+        images=[]
+        for p in snaps:
+            try:
+                images.append(InlineImage(tpl, str(p), width=Mm(160)))
+            except:
+                pass
+        ctx["zap_images"]=images
+
+        tpl.render(ctx)
+        tpl.save(out_docx)
+
+    except Exception as e:
+        # Falhou abrir/renderizar o template (ex.: BadZipFile / ponteiro LFS) -> fallback
+        save_fallback(out_docx, totals, cvss_sum, top)
 
 # ---------- main ----------
 if __name__ == "__main__":
