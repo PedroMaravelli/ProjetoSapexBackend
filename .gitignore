@@ -1,5 +1,4 @@
 node_modules
 # arquivos .env
 .env
-.env.*
-.env.ci
+
