@@ -63,90 +63,88 @@ const ProfessorController = {
     }
 },
     NotaAluno: async (req,res) =>{
-       const { professor_id } = req.params;
+        const { professor_id } = req.params;
 
-try {
-    const relacoes = await AlunoHasTrabalho.findAll({
-        where: {
-            nota: null
-        },
-        include: [
-            {
-                model: Trabalho,
-                as: 'trabalho',
-                where: { professor_id }
-            },
-            {
-                model: Aluno,
-                as: 'aluno'
+            try {
+                const relacoes = await AlunoHasTrabalho.findAll({
+                    where: {
+                        nota: null
+                    },
+                    include: [
+                        {
+                            model: Trabalho,
+                            as: 'trabalho',
+                            where: { professor_id }
+                        },
+                        {
+                            model: Aluno,
+                            as: 'aluno'
+                        }
+                    ]
+                });
+
+                if (!relacoes || relacoes.length === 0) {
+                    return res.status(404).json({ message: 'Nenhuma relação pendente encontrada para esse professor.' });
+                }
+
+                const trabalhosMap = {};
+
+                relacoes.forEach(relacao => {
+                    const trabalhoId = relacao.trabalho.id;
+
+                    if (!trabalhosMap[trabalhoId]) {
+                        trabalhosMap[trabalhoId] = {
+                            trabalho: relacao.trabalho,
+                            alunos: []
+                        };
+                    }
+
+                    trabalhosMap[trabalhoId].alunos.push({
+                        id: relacao.aluno.id,
+                        nome: relacao.aluno.nome,
+                        email: relacao.aluno.email,
+                        ra: relacao.aluno.ra,
+                        turma: relacao.aluno.turma
+                    });
+                });
+
+                const resultado = Object.values(trabalhosMap);
+
+                res.json(resultado);
+            } catch (error) {
+                console.error('Erro ao buscar dados:', error);
+                res.status(500).json({ message: 'Erro ao buscar trabalhos pendentes do professor.' });
             }
-        ]
-    });
-
-    if (!relacoes || relacoes.length === 0) {
-        return res.status(404).json({ message: 'Nenhuma relação pendente encontrada para esse professor.' });
-    }
-
-    // Agrupar trabalhos com seus respectivos alunos
-    const trabalhosMap = {};
-
-    relacoes.forEach(relacao => {
-        const trabalhoId = relacao.trabalho.id;
-
-        if (!trabalhosMap[trabalhoId]) {
-            trabalhosMap[trabalhoId] = {
-                trabalho: relacao.trabalho,
-                alunos: []
-            };
-        }
-
-        trabalhosMap[trabalhoId].alunos.push({
-            id: relacao.aluno.id,
-            nome: relacao.aluno.nome,
-            email: relacao.aluno.email,
-            ra: relacao.aluno.ra,
-            turma: relacao.aluno.turma
-        });
-    });
-
-    const resultado = Object.values(trabalhosMap);
-
-    res.json(resultado);
-} catch (error) {
-    console.error('Erro ao buscar dados:', error);
-    res.status(500).json({ message: 'Erro ao buscar trabalhos pendentes do professor.' });
-}
 
             },
     LocalizacaoTrabalho: async (req,res) => {
         try {
             const trabalhoId = req.params.trabalhoId;
 
-            // Buscando o trabalho com o id fornecido
+
             const trabalho = await Trabalho.findOne({
             where: { id: trabalhoId },
             include: {
                 model: Localizacao,
-                as:"Localizacao", // Incluindo a tabela de Localizacao
-                required: true // Isso garante que a localização será encontrada
+                as:"Localizacao", 
+                required: true 
             }
             });
 
-            // Se o trabalho não for encontrado, retorna um erro
+
             if (!trabalho) {
             return res.status(404).json({ message: 'Trabalho não encontrado.' });
             }
 
-            // Retorna a localização associada ao trabalho
+
             return res.json(trabalho.Localizacao);
         } catch (error) {
             console.error(error);
             return res.status(500).json({ message: 'Erro ao buscar a localização.', error });
-  }
+        }
     }
 
-    }
-    
+}
 
 
 module.exports = ProfessorController;  

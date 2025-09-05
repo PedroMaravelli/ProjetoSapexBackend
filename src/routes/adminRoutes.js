@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const AdminController = require('../controllers/Admin/adminController');  
-const cadastroTrabalhosMiddleware = require("../Middlawares/Admin/cadastroTrabalhosMiddleware")
-const cadastroGuiaSapexMiddleware = require("../Middlawares/Admin/cadastroGuiaSapexMiddleware")
+const cadastroTrabalhosMiddleware = require("../middlawares/Admin/cadastroTrabalhosMiddleware")
+const cadastroGuiaSapexMiddleware = require("../middlawares/Admin/cadastroGuiaSapexMiddleware")
 
-const {cadastroTrabalhosAdminSchema} = require("../Middlawares/schemas/adminSchemaValidation")
-const {cadastroGuiaSapexSchema} = require("../Middlawares/schemas/adminSchemaValidation")
+const {cadastroTrabalhosAdminSchema} = require("../middlawares/schemas/adminSchemaValidation")
+const {cadastroGuiaSapexSchema} = require("../middlawares/schemas/adminSchemaValidation")
 
 
 

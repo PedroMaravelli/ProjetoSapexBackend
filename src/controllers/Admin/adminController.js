@@ -23,7 +23,7 @@ const AdminController = {
             });
         }
 
-        // 3. Criar o trabalho com o ID do professor e localização
+
         const novoTrabalho = await Trabalho.create({
             titulo,
             tipo,
@@ -34,9 +34,8 @@ const AdminController = {
             localizacao_id: novaLocalizacao.id
         });
 
-        // 4. Processar alunos
         for (const aluno of alunos) {
-            // Buscar ou criar aluno
+
             let alunoExistente = await Aluno.findOne({ where: { email: aluno.email } });
 
             if (!alunoExistente) {
@@ -49,7 +48,7 @@ const AdminController = {
                 });
             }
 
-            // 5. Criar associação no aluno_has_trabalho
+
             await AlunoHasTrabalho.create({
                 alunoId: alunoExistente.id,
                 trabalhoId: novoTrabalho.id
@@ -66,7 +65,7 @@ const AdminController = {
 
     ListaTrabalhos: async (req, res) => {
         try {
-            // Buscando todos os trabalhos com seus relacionamentos
+
             const trabalhos = await Trabalho.findAll({
                 include: [
                     
@@ -76,10 +75,9 @@ const AdminController = {
                 ]
             });
     
-            // Retorno de sucesso
             return res.status(200).json(trabalhos);
         } catch (error) {
-            // Caso haja erro
+
             console.error(error);
             return res.status(500).json({
                 mensagem: 'Erro ao listar os trabalhos.',
@@ -109,10 +107,10 @@ const AdminController = {
             
             const guias = await GuiaSapex.findAll()
     
-            // Retorno de sucesso
+
             return res.status(200).json(guias);
         } catch (error) {
-            // Caso haja erro
+
             console.error(error);
             return res.status(500).json({
                 mensagem: 'Erro ao listar Intruções.',

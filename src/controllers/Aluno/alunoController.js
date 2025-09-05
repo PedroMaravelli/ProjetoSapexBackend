@@ -32,7 +32,7 @@ const AlunoController = {
         }
             },
     MeusTrabalhos: async (req,res) =>{
-         const { aluno_id } = req.params;
+        const { aluno_id } = req.params;
 
         try {
             const trabalhos = await AlunoHasTrabalho.findAll({
@@ -41,7 +41,7 @@ const AlunoController = {
                 {
                 model: Trabalho,
                 as: 'trabalho',
-                 include: [
+                    include: [
                         {
                         model: Professor,
                         as:"Professor"
@@ -60,7 +60,7 @@ const AlunoController = {
             return res.status(404).json({ message: 'Nenhum trabalho encontrado para este aluno.' });
             }
 
-            // Retorna apenas os dados dos trabalhos
+
             const resultado = trabalhos.map(item => item.trabalho);
 
             res.json(resultado);
