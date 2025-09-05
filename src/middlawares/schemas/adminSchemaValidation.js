@@ -9,19 +9,18 @@ const localizaoSchema = z.object({
 
 const professorSchema = z.object({
     nome: z.string(),
-    email:z.string().email().includes("@"),
+    email: z.string().email(),
 })
 const alunosSchema = z.object({
     nome: z.string(),
     email: z.string(),
-    ra: z.string(),
     turma: z.string().nullable(),
 })
 const cadastroTrabalhosAdminSchema = z.object({
     titulo: z.string().min(3, "Titulo deve ter ao menos 3 caracteres"),
     tipo: z.string(),
     n_poster: z.number(),
-    data:z.date(),
+    data: z.string().or(z.date()),
     horario:z.string(),
     localizacao: z.array(localizaoSchema),
     professor:z.array(professorSchema),
