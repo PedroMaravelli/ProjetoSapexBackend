@@ -104,8 +104,7 @@ try {
             id: relacao.aluno.id,
             nome: relacao.aluno.nome,
             email: relacao.aluno.email,
-            ra: relacao.aluno.ra,
-            turma: relacao.aluno.turma
+            turma: relacao.aluno.turma || 'não informado'
         });
     });
 
