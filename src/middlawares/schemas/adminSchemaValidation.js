@@ -1,32 +1,38 @@
 // validations/adminSchema.js
 const { z } = require("zod");
 
-const localizaoSchema = z.object({
-    predio: z.string(),
-    sala: z.string(),
-    ponto_referencia: z.string(),
-})
+const alunoSchema = z.object({
+    nome: z.string().min(1, "Nome é obrigatório"),
+    email: z.string()
+        .email("Email inválido")
+        .regex(/@graduacao\.fsa\.br$/, "Email deve terminar com @graduacao.fsa.br"),
+});
 
 const professorSchema = z.object({
-    nome: z.string(),
-    email:z.string().email().includes("@"),
-})
-const alunosSchema = z.object({
-    nome: z.string(),
-    email: z.string(),
-    ra: z.string(),
-    turma: z.string().nullable(),
-})
-const cadastroTrabalhosAdminSchema = z.object({
-    titulo: z.string().min(3, "Titulo deve ter ao menos 3 caracteres"),
-    tipo: z.string(),
-    n_poster: z.number(),
-    data:z.date(),
-    horario:z.string(),
-    localizacao: z.array(localizaoSchema),
-    professor:z.array(professorSchema),
-    alunos:z.array(alunosSchema)
+    nome: z.string().min(1, "Nome é obrigatório"),
+    email: z.string()
+        .email("Email inválido")
+        .regex(/@fsa\.br$/, "Email deve terminar com @fsa.br"),
+});
 
+const localizacaoSchema = z.object({
+    predio: z.string().min(1, "Prédio é obrigatório"),
+    ponto_referencia: z.string().min(1, "Ponto de referência é obrigatório"),
+});
+
+const cadastroTrabalhosAdminSchema = z.object({
+    titulo: z.string().min(1, "Título é obrigatório"),
+    tipo: z.string().min(1, "Tipo é obrigatório"),
+    data: z.string().min(1, "Data é obrigatória"),
+    turma: z.string().min(1, "Turma é obrigatória"),
+    horario: z.string().min(1, "Horário é obrigatório"),
+    nomeProfessor: z.string().min(1, "Nome do professor é obrigatório"),
+    emailProfessor: z.string()
+        .email("Email inválido")
+        .regex(/@fsa\.br$/, "Email deve terminar com @fsa.br"),
+    localizacao: localizacaoSchema.optional(),
+    professor: professorSchema.optional(),
+    alunos: z.array(alunoSchema).nonempty("Adicione pelo menos um aluno"),
 });
 
 

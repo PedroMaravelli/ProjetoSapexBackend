@@ -43,9 +43,7 @@ const AdminController = {
                 alunoExistente = await Aluno.create({
                     nome: aluno.nome,
                     email: aluno.email,
-                    ra: aluno.ra,
                     turma: req.body.turma || 'não informado',
-                    senha: '123456' // senha padrão
                 });
             }
 
