@@ -3,9 +3,10 @@ module.exports = (sequelize, DataTypes) => {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     nome: DataTypes.STRING(60),
     email: DataTypes.STRING(100),
-    ra: DataTypes.INTEGER,
-    senha: DataTypes.STRING(10),
-    turma: DataTypes.STRING(300)
+    turma: {
+      type:DataTypes.STRING(300),
+      allowNull: true
+    }
   }, {
     freezeTableName: true,
     timestamps: false

@@ -1,5 +1,4 @@
 const { Trabalho, Aluno, Professor, Localizacao, Admin, GuiaSapex, AlunoHasTrabalho } = require('../../database/models');  // Importando todos os modelos necessário
-const bcrypt = require('bcrypt');
 
 
 
@@ -8,33 +7,27 @@ const AdminController = {
         try {
         const { titulo, tipo, n_poster, data, horario, localizacao, professor, alunos } = req.body;
 
-        if (!titulo || !tipo || !n_poster || !data || !horario || !localizacao || !professor || !alunos || alunos.length === 0) {
-            return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
-        }
-
-        // 1. Criar localização
         const novaLocalizacao = await Localizacao.create({
             predio: localizacao.predio,
             sala: localizacao.sala,
             ponto_referencia: localizacao.ponto_referencia
         });
 
-        // 2. Buscar ou criar professor
+
         let professorExistente = await Professor.findOne({ where: { email: professor.email } });
 
         if (!professorExistente) {
             professorExistente = await Professor.create({
                 nome: professor.nome,
                 email: professor.email,
-                re: professor.re,
-                senha: '123456' // senha padrão, ajuste conforme sua lógica
             });
         }
 
-        // 3. Criar o trabalho com o ID do professor e localização
+
         const novoTrabalho = await Trabalho.create({
             titulo,
             tipo,
+            turma: req.body.turma || null,
             n_poster,
             data,
             horario,
@@ -42,22 +35,18 @@ const AdminController = {
             localizacao_id: novaLocalizacao.id
         });
 
-        // 4. Processar alunos
         for (const aluno of alunos) {
-            // Buscar ou criar aluno
+
             let alunoExistente = await Aluno.findOne({ where: { email: aluno.email } });
 
             if (!alunoExistente) {
                 alunoExistente = await Aluno.create({
                     nome: aluno.nome,
                     email: aluno.email,
-                    ra: aluno.ra,
                     turma: req.body.turma || 'não informado',
-                    senha: '123456' // senha padrão
                 });
             }
 
-            // 5. Criar associação no aluno_has_trabalho
             await AlunoHasTrabalho.create({
                 alunoId: alunoExistente.id,
                 trabalhoId: novoTrabalho.id
@@ -74,7 +63,7 @@ const AdminController = {
 
     ListaTrabalhos: async (req, res) => {
         try {
-            // Buscando todos os trabalhos com seus relacionamentos
+
             const trabalhos = await Trabalho.findAll({
                 include: [
                     
@@ -84,10 +73,9 @@ const AdminController = {
                 ]
             });
     
-            // Retorno de sucesso
             return res.status(200).json(trabalhos);
         } catch (error) {
-            // Caso haja erro
+
             console.error(error);
             return res.status(500).json({
                 mensagem: 'Erro ao listar os trabalhos.',
@@ -98,11 +86,6 @@ const AdminController = {
     CadastroInstrucao: async (req,res) => {
         try {
             const { titulo, descricao } = req.body;
-        
-            
-            if (!titulo || !descricao ) {
-                return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
-            }
         
             const novaInstrucao = await GuiaSapex.create({
                 titulo,
@@ -122,10 +105,10 @@ const AdminController = {
             
             const guias = await GuiaSapex.findAll()
     
-            // Retorno de sucesso
+
             return res.status(200).json(guias);
         } catch (error) {
-            // Caso haja erro
+
             console.error(error);
             return res.status(500).json({
                 mensagem: 'Erro ao listar Intruções.',
@@ -139,13 +122,13 @@ const AdminController = {
         
             
             if (!predio || !sala || !ponto_referencia ) {
-              return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
+                return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
             }
         
             const localizacao = await Localizacao.create({
-               predio,
-               sala,
-               ponto_referencia
+                predio,
+                sala,
+                ponto_referencia
             });
         
             return res.status(201).json({ mensagem: 'Trabalho criado com sucesso.', local: localizacao });
@@ -154,53 +137,48 @@ const AdminController = {
             return res.status(500).json({ mensagem: 'Erro interno ao criar trabalho.' });
         }
     },
-    Login: async (req,res) => {
-        try {
-        const { email, senha } = req.body;
-
-        
-        const admin = await Admin.findOne({ where: { email } });
-
-        if (!admin) {
-        return res.status(400).json({ message: "Usuário não encontrado" });
-        }
-
-        
-        if (senha !== admin.senha) {
-        return res.status(400).json({ message: "Senha incorreta" });
-        }
-
-        return res.status(200).json({ message: "Login bem-sucedido" });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: "Erro no servidor" });
-    }
-
-        },
     InfosTrabalho: async (req,res) => {
-    const { id } = req.params;
+        const { id } = req.params;
 
-    try {
-    const trabalho = await Trabalho.findByPk(id, {
-        include: [
-        {model: Aluno,
-            as: "alunos", // esse "as" deve ser igual ao definido em Trabalho.associate()
-            through: { attributes: [] } },      
-        { model: Professor, as: "Professor"},
-        { model:Localizacao, as: 'Localizacao' },
-        ],
-    });
+        try {
+        const trabalho = await Trabalho.findByPk(id, {
+            include: [
+            {model: Aluno,
+                as: "alunos", 
+                through: { attributes: [] } },      
+            { model: Professor, as: "Professor"},
+            { model:Localizacao, as: 'Localizacao' },
+            ],
+        });
 
-    if (!trabalho) {
-        return res.status(404).json({ error: 'Trabalho não encontrado' });
-    }
+        if (!trabalho) {
+            return res.status(404).json({ error: 'Trabalho não encontrado' });
+        }
 
-    return res.json(trabalho);
-    } catch (error) {
-    console.error('Erro ao buscar trabalho por ID:', error);
-    return res.status(500).json({ error: 'Erro interno do servidor' });
-    }
-    },
-};
+        return res.json(trabalho);
+        } catch (error) {
+        console.error('Erro ao buscar trabalho por ID:', error);
+        return res.status(500).json({ error: 'Erro interno do servidor' });
+        }
+        },
+        DeletarGuiaSapex: async (req, res) => {
+                const { id } = req.params;
+        
+                try {
+                    const guia = await GuiaSapex.findByPk(id);
+        
+                    if (!guia) {
+                        return res.status(404).json({ message: 'Guia não encontrada.' });
+                    }
+        
+                    await guia.destroy();
+        
+                    return res.status(200).json({ message: 'Guia deletada com sucesso.' });
+                } catch (error) {
+                    console.error(error);
+                    return res.status(500).json({ message: 'Erro ao deletar a guia.' });
+                }
+            }
+    };
 
 module.exports = AdminController;  
