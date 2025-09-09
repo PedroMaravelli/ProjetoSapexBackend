@@ -1,6 +1,7 @@
 const { Op } = require("sequelize");
 const { Aluno, Trabalho, AlunoHasTrabalho, Professor, Localizacao } = require("../../database/models");
 
+
 const AlunoController = {
     TodosTrabalhos: async (req,res) => {
         const anoAtual = new Date().getFullYear();
@@ -32,35 +33,40 @@ const AlunoController = {
         }
             },
     MeusTrabalhos: async (req,res) =>{
-         const { aluno_id } = req.params;
+        const { aluno_email } = req.params;
 
         try {
+            const aluno = await Aluno.findOne({ where: { email: aluno_email } });
+            
+        
+            if (!aluno) {
+                return res.status(404).json({ message: 'Aluno não encontrado.' });
+            }
+
             const trabalhos = await AlunoHasTrabalho.findAll({
-            where: { aluno_id },
-            include: [
-                {
-                model: Trabalho,
-                as: 'trabalho',
-                 include: [
-                        {
-                        model: Professor,
-                        as:"Professor"
-                        
-                        },
-                        {
-                            model: Aluno,
-                            as:"alunos"
-                        }
-                    ] 
-                }
-            ]
+                where: { aluno_id: aluno.id },
+                include: [
+                    {
+                    model: Trabalho,
+                    as: 'trabalho',
+                        include: [
+                            {
+                            model: Professor,
+                            as:"Professor"
+                            },
+                            {
+                                model: Aluno,
+                                as:"alunos"
+                            }
+                        ] 
+                    }
+                ]
             });
 
             if (trabalhos.length === 0) {
             return res.status(404).json({ message: 'Nenhum trabalho encontrado para este aluno.' });
             }
 
-            // Retorna apenas os dados dos trabalhos
             const resultado = trabalhos.map(item => item.trabalho);
 
             res.json(resultado);
@@ -69,13 +75,28 @@ const AlunoController = {
             res.status(500).json({ message: 'Erro ao buscar trabalhos do aluno.' });
         }
             },
+
     NotaAluno: async (req,res) =>{
-        const { aluno_id, trabalho_id } = req.params;
+        const jwt = require('jsonwebtoken');
+        const token = req.params.token
+        
+        if (!token) {
+            return res.status(401).json({ message: 'Token não fornecido.' });
+        }
 
         try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const { aluno_email, trabalho_id } = decoded;
+
+            const aluno = await Aluno.findOne({ where: { email: aluno_email } });
+            
+            if (!aluno) {
+                return res.status(404).json({ message: 'Aluno não encontrado.' });
+            }
+
             const relacao = await AlunoHasTrabalho.findOne({
             where: {
-                aluno_id,
+                aluno_id: aluno.id,
                 trabalho_id
             },
             include: [
@@ -86,8 +107,7 @@ const AlunoController = {
                 {
                 model: Aluno,
                 as: 'aluno'
-                },
-                
+                }
             ]
             });
 
@@ -99,7 +119,7 @@ const AlunoController = {
             nota: relacao.nota,
             justificativa_nota: relacao.justificativa_nota,
             trabalho: relacao.trabalho,
-            aluno:relacao.aluno
+            aluno: relacao.aluno
             };
 
             res.json(resultado);

@@ -30,9 +30,10 @@ const cadastroTrabalhosAdminSchema = z.object({
     emailProfessor: z.string()
         .email("Email inválido")
         .regex(/@fsa\.br$/, "Email deve terminar com @fsa.br"),
+    n_poster: z.number(),
     localizacao: localizacaoSchema.optional(),
     professor: professorSchema.optional(),
-    alunos: z.array(alunoSchema).nonempty("Adicione pelo menos um aluno"),
+    alunos: z.array(alunoSchema).nonempty("Adicione pelo menos um aluno")
 });
 
 
