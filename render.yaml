@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: sapex-backend
+    env: node
+    buildCommand: npm install
+    startCommand: node app.js
