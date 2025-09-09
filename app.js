@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
 const AdminRoutes = require("./src/routes/adminRoutes")
 const ProfessorRoutes = require("./src/routes/professorRoutes")
 const AlunoRoutes = require("./src/routes/alunoRoutes")
@@ -11,7 +11,7 @@ const cors = require('cors');
 require('dotenv').config()
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: process.env.NODE_ENV === 'production' ? "https://projeto-sapex-frontend.vercel.app" : "http://localhost:5173",
   credentials: true
 }));
 
