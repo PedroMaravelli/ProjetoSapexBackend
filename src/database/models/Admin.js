@@ -1,3 +1,4 @@
+
 // models/admin.js
 module.exports = (sequelize, DataTypes) => {
     const Admin = sequelize.define('Admin', {
@@ -6,7 +7,10 @@ module.exports = (sequelize, DataTypes) => {
         email: DataTypes.STRING(100),
         senha: DataTypes.STRING(10),
         matricula: DataTypes.STRING(45)
-        });
+        }, {
+            freezeTableName: true, 
+            timestamps: false  // <- desativa createdAt e updatedAt// <-- adicione esta linha
+          });
     
         Admin.associate = (models) => {
         Admin.belongsToMany(models.Trabalho, {

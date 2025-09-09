@@ -4,9 +4,10 @@ module.exports = (sequelize, DataTypes) => {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
         nome: DataTypes.STRING(60),
         email: DataTypes.STRING(100),
-        re: DataTypes.INTEGER,
-        senha: DataTypes.STRING(10)
-    });
+    }, {
+        freezeTableName: true,
+        timestamps: false 
+      });
 
     Professor.associate = (models) => {
         Professor.hasMany(models.Trabalho, { foreignKey: 'professor_id' });
