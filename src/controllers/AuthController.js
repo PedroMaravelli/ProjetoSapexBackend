@@ -28,12 +28,9 @@ class AuthController {
             });
             }
 
-            // Validar se o email é institucional
+
             if (!UserService.validateInstitutionalEmail(user.email)) {
-            return res.status(403).json({
-                error: 'Acesso negado',
-                message: 'Apenas emails institucionais são permitidos (@graduacao.fsa.br ou @fsa.br)'
-            });
+                return res.redirect(`http://localhost:5173/?message=${encodeURIComponent('Apenas e-mails do domínio institucional são permitidos. EX: @fsa.br ou @graduacao.fsa.br')}`);
             }
 
             
