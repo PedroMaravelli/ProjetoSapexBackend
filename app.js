@@ -7,6 +7,7 @@ const AlunoRoutes = require("./src/routes/alunoRoutes")
 const AuthGoogleRoutes = require("./src/routes/authGoogleRoutes");
 const passport = require('./src/config/passport');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 const cors = require('cors');
 require('dotenv').config()
 
@@ -16,10 +17,22 @@ app.use(cors({
 }));
 
 app.use(express.json());
+const sessionStore = new MySQLStore({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
+});
+
 app.use(session({
   secret: process.env.GOOGLE_CLIENT_SECRET || 'sua_chave_secreta_sessao',
   resave: false,
   saveUninitialized: false,
+  store: sessionStore,
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000 // 24 horas
+  }
 }));
 
 // Inicializar Passport
