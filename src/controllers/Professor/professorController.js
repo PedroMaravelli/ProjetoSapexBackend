@@ -36,10 +36,6 @@ const ProfessorController = {
         });
 
         
-        if (trabalhos.length === 0) {
-            return res.status(404).json({ message: 'Nenhum trabalho encontrado para este professor.' });
-        }
-
         const trabalhosPendentes = trabalhos.map(trabalho => {
             const trabalhoObj = trabalho.toJSON();
             trabalhoObj.alunos = trabalhoObj.alunos.filter(aluno => aluno.aluno_has_trabalho.nota === null);
@@ -105,10 +101,6 @@ const ProfessorController = {
                     }
                 ]
             });
-
-            if (trabalhos.length === 0) {
-                return res.status(404).json({ message: 'Nenhum trabalho encontrado para este professor.' });
-            }
 
             const trabalhosLimpos = trabalhos.map(trabalho => {
                 const trabalhoObj = trabalho.toJSON();
