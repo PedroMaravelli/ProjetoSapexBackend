@@ -16,8 +16,8 @@ class UserService {
         return 'aluno';
         }
 
-        if (emailLower.endsWith('@fsa.br')) {
-        return 'professor';
+        if (emailLower.endsWith('@gmail.com')) {
+        return 'prof';
         }
 
         // Email não autorizado
@@ -25,7 +25,7 @@ class UserService {
     }
 
     static validateInstitutionalEmail(email) {
-        const allowedDomains = ['@graduacao.fsa.br', '@fsa.br'];
+        const allowedDomains = ['@graduacao.fsa.br', '@fsa.br', "@gmail.com"];
         const specificAdminEmail = 'admin@fsa.br';
 
         if (email.toLowerCase() === specificAdminEmail) {
