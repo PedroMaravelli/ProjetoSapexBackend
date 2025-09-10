@@ -16,16 +16,16 @@ class UserService {
         return 'aluno';
         }
 
-        if (emailLower.endsWith('@gmail.com')) {
-        return 'prof';
+        if (emailLower.endsWith('@fsa.br') || emailLower.endsWith('@gmail.com')) {
+            return 'professor';
         }
 
-        // Email não autorizado
+
         throw new Error('Email não pertence ao domínio institucional da Fundação Santo André autorizado');
     }
 
     static validateInstitutionalEmail(email) {
-        const allowedDomains = ['@graduacao.fsa.br', '@fsa.br', "@gmail.com"];
+        const allowedDomains = ['@graduacao.fsa.br', '@fsa.br', '@gmail.com'];
         const specificAdminEmail = 'admin@fsa.br';
 
         if (email.toLowerCase() === specificAdminEmail) {
