@@ -22,11 +22,7 @@ const AlunoController = {
             ]
             });
             
-            if (trabalhos.length > 0) {
             return res.json(trabalhos);
-            } else {
-            return res.status(404).json({ message: 'Nenhum trabalho encontrado para este ano.' });
-            }
         } catch (error) {
             console.error(error);
             return res.status(500).json({ message: 'Erro ao buscar trabalhos.' });
@@ -62,10 +58,6 @@ const AlunoController = {
                     }
                 ]
             });
-
-            if (trabalhos.length === 0) {
-            return res.status(404).json({ message: 'Nenhum trabalho encontrado para este aluno.' });
-            }
 
             const resultado = trabalhos.map(item => item.trabalho);
 
