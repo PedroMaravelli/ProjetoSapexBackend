@@ -53,7 +53,7 @@ class AuthController {
             const alunoExists = await Aluno.findOne({ where: { email: userData.email , nome: userData.name} });
             
 
-            if(!professorExists && userData.role === "professor"){
+            if(!professorExists && userData.role === "prof"){
                 await Professor.create({
                 nome: userData.name,
                 email: userData.email,
