@@ -1,6 +1,8 @@
 const passport = require('passport');
 const JwtService = require('../config/jwtConfig');
 const UserService = require('../service/userService');
+require('dotenv').config()
+
 const { Aluno, Professor } = require('../database/models');
 
 class AuthController {
@@ -30,7 +32,7 @@ class AuthController {
 
 
             if (!UserService.validateInstitutionalEmail(user.email)) {
-                return res.redirect(`http://localhost:5173/?message=${encodeURIComponent('Apenas e-mails do domínio institucional são permitidos. EX: @fsa.br ou @graduacao.fsa.br')}`);
+                return res.redirect(`${process.env.FROND_END_URL}?message=${encodeURIComponent('Apenas e-mails do domínio institucional são permitidos. EX: @fsa.br ou @graduacao.fsa.br')}`);
             }
 
             
@@ -66,15 +68,15 @@ class AuthController {
 
 
             if(userData.role === "professor"){
-                const redirectUrl = `http://localhost:5173/auth/callback?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
+                const redirectUrl = `${process.env.FROND_END_URL}auth/callback?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
                 return res.redirect(redirectUrl);
             }
             if(userData.role === "aluno"){
-                const redirectUrl = `http://localhost:5173/auth/callback?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
+                const redirectUrl = `${process.env.FROND_END_URL}auth/callback?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
                 return res.redirect(redirectUrl);
             }
             if(userData.role === "admin"){
-                const redirectUrl = `http://localhost:5173/auth/callback?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
+                const redirectUrl = `${process.env.FROND_END_URL}auth/callback?token=${token}&role=${userData.role}&name=${encodeURIComponent(userData.name)}`;
                 return res.redirect(redirectUrl);
             }
 
