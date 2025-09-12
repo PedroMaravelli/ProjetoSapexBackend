@@ -8,6 +8,7 @@ const atribuirNotaProfessorMiddleware = require("../middlawares/Professor/atribu
 const {atribuirNotaParamsSchema, atribuirNotaBodySchema} = require("../middlawares/schemas/professorSchema")
 
 
+router.get('/:email', ProfessorController.GetProfessor);
 router.get("/trabalhos/:email", ProfessorController.TrabalhosPorProfessor)
 router.get('/localizacao/:token', ProfessorController.LocalizacaoTrabalho);
 router.get("/nota/:token", ProfessorController.NotaAluno)
