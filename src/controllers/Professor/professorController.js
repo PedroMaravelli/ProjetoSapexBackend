@@ -49,6 +49,22 @@ const ProfessorController = {
     }
 
     },
+    GetProfessor: async (req, res) => {
+        try {
+            const email = req.params.email;
+
+            const professor = await Professor.findOne({ where: { email } });
+
+            if (!professor) {
+                return res.status(404).json({ message: 'Professor não encontrado.' });
+            }
+
+            return res.status(200).json(professor);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Erro ao buscar o professor.' });
+        }
+    },
     AtribuirNota: async(req, res) => {
         try {
             const { alunoId, trabalhoId } = req.params;
