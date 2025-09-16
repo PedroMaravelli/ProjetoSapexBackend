@@ -1,6 +1,6 @@
-const { Admin } = require("../../database/models");
-const bcrypt = require("bcrypt");
-const jwt = require('jsonwebtoken');
+const AuthService = require('../../services/AuthService');
+const ResponseHelper = require('../../utils/ResponseHelper');
+const { MESSAGES } = require('../../constants');
 
 const AuthAdminController = {
     login: async (req, res) => {
@@ -8,48 +8,27 @@ const AuthAdminController = {
             const { email, senha } = req.body;
 
             if (!email || !senha) {
-                return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
+                return ResponseHelper.badRequest(res, 'Email e senha são obrigatórios.');
             }
 
-            const admin = await Admin.findOne({
-                where: { email }
+            const result = await AuthService.loginAdmin(email, senha);
+
+            if (!result) {
+                return ResponseHelper.badRequest(res, 'Usuário não encontrado.');
+            }
+
+            if (result.error) {
+                return ResponseHelper.badRequest(res, result.error);
+            }
+
+            return ResponseHelper.success(res, {
+                message: 'Login realizado com sucesso!',
+                admin: result.admin,
+                token: result.token
             });
-
-            if (!admin) {
-                return res.status(401).json({ message: 'Usuário não encontrado.' });
-            }
-
-            const senhaValida = await bcrypt.compare(senha, admin.senha); 
-
-            if (!senhaValida) {
-                return res.status(401).json({ message: 'Senha incorreta.' });
-            }
-
-            const payload = {
-                id: admin.id,
-                email: admin.email,
-                nome: admin.nome, 
-                role: 'admin' 
-            };
-
-            const token = jwt.sign(
-                payload,
-                process.env.JWT_SECRET, 
-                {
-                    expiresIn: process.env.JWT_EXPIRES_IN || '7d', 
-                }
-            );
-
-            const { senha: _, ...adminSemSenha } = admin.toJSON();
-            return res.status(200).json({
-            message: 'Login realizado com sucesso!',
-            admin: adminSemSenha,
-            token: token,
-            
-        });
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ message: 'Erro ao fazer login.' });
+            return ResponseHelper.error(res, 'Erro ao fazer login.');
         }
     },
     alterarSenha: async (req, res) => {
@@ -57,22 +36,18 @@ const AuthAdminController = {
             const { email, senha } = req.body;
 
             if (!email || !senha) {
-                return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
+                return ResponseHelper.badRequest(res, 'Email e senha são obrigatórios.');
             }
 
-            const admin = await Admin.findOne({ where: { email } });
+            const admin = await AuthService.alterarSenhaAdmin(email, senha);
 
             if (!admin) {
-                return res.status(404).json({ message: 'Admin não encontrado.' });
+                return ResponseHelper.notFound(res, 'Admin não encontrado.');
             }
 
-            const hashSenha = await hash(senha, 10);
-
-            await Admin.update({ hashSenha }, { where: { email } });
-
-            return res.status(200).json({ message: 'Senha alterada com sucesso.' });
+            return ResponseHelper.success(res, null, 'Senha alterada com sucesso.');
         } catch (error) {
-            return res.status(500).json({ message: 'Erro ao alterar a senha.' });
+            return ResponseHelper.error(res, 'Erro ao alterar a senha.');
         }
     },
 }

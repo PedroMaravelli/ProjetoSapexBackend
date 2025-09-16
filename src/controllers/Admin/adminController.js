@@ -1,283 +1,125 @@
-const { Op } = require('sequelize');
-const { Trabalho, Aluno, Professor, Localizacao, Admin, GuiaSapex, AlunoHasTrabalho } = require('../../database/models');  // Importando todos os modelos necessário
-
-
+const AdminService = require('../../services/AdminService');
+const ResponseHelper = require('../../utils/ResponseHelper');
+const { MESSAGES } = require('../../constants');
 
 const AdminController = {
     CadastroTrabalhos: async (req, res) => {
         try {
-        const { titulo, tipo, n_poster, data, horario, localizacao, professor, alunos } = req.body;
-
-        const novaLocalizacao = await Localizacao.create({
-            predio: localizacao.predio,
-            sala: localizacao.sala,
-            ponto_referencia: localizacao.ponto_referencia
-        });
-
-
-        let professorExistente = await Professor.findOne({ where: { email: professor.email } });
-
-        if (!professorExistente) {
-            professorExistente = await Professor.create({
-                nome: professor.nome,
-                email: professor.email,
-            });
+            const dadosTrabalho = req.validatedBody || req.body;
+            const novoTrabalho = await AdminService.criarTrabalho(dadosTrabalho);
+            
+            return ResponseHelper.created(res, novoTrabalho, MESSAGES.SUCCESS.TRABALHO_CREATED);
+        } catch (erro) {
+            console.error('Erro ao criar trabalho:', erro);
+            return ResponseHelper.error(res, MESSAGES.ERROR.INTERNAL_ERROR);
         }
-
-
-        const novoTrabalho = await Trabalho.create({
-            titulo,
-            tipo,
-            turma: req.body.turma || null,
-            n_poster,
-            data,
-            horario,
-            professor_id: professorExistente.id,
-            localizacao_id: novaLocalizacao.id
-        });
-
-        for (const aluno of alunos) {
-
-            let alunoExistente = await Aluno.findOne({ where: { email: aluno.email } });
-
-            if (!alunoExistente) {
-                alunoExistente = await Aluno.create({
-                    nome: aluno.nome,
-                    email: aluno.email,
-                    turma: req.body.turma || 'não informado',
-                });
-            }
-
-            await AlunoHasTrabalho.create({
-                alunoId: alunoExistente.id,
-                trabalhoId: novoTrabalho.id
-            });
-        }
-
-        return res.status(201).json({ mensagem: 'Trabalho cadastrado com sucesso.', trabalho: novoTrabalho });
-
-    } catch (erro) {
-        console.error('Erro ao criar trabalho:', erro);
-        return res.status(500).json({ mensagem: 'Erro interno ao criar trabalho.' });
-    }
     },
 
     ListaTrabalhos: async (req, res) => {
-        const anoAtual = new Date().getFullYear();
-        
-                try {
-                    const trabalhos = await Trabalho.findAll({
-                    where: {
-                        data: {
-                        [Op.gte]: new Date(`${anoAtual}-01-01`),
-                        [Op.lt]: new Date(`${anoAtual + 1}-01-01`)
-                        }
-                    },
-                    include: [
-                        {
-                        model: Aluno,
-                        as:"alunos"
-                        }
-                    ]
-                    });
-                    return res.json(trabalhos);
-                } catch (error) {
-                    console.error(error);
-                    return res.status(500).json({ message: 'Erro ao buscar trabalhos.' });
-                }
-    },
-    CadastroInstrucao: async (req,res) => {
         try {
-            const { titulo, descricao } = req.body;
-        
-            const novaInstrucao = await GuiaSapex.create({
-                titulo,
-                descricao
-            });
-        
-            return res.status(201).json({ mensagem: 'Trabalho criado com sucesso.', instrucao: novaInstrucao });
-        } catch (erro) {
-            console.error('Erro ao criar trabalho:', erro);
-            return res.status(500).json({ mensagem: 'Erro interno ao criar trabalho.' });
-        }
-    
-
-    },
-    ListaInstrucao: async (req,res) => {
-        try {
-            
-            const guias = await GuiaSapex.findAll()
-    
-
-            return res.status(200).json(guias);
+            const trabalhos = await AdminService.listarTrabalhos();
+            return ResponseHelper.success(res, trabalhos);
         } catch (error) {
-
             console.error(error);
-            return res.status(500).json({
-                mensagem: 'Erro ao listar Intruções.',
-                erro: error.message
-            });
+            return ResponseHelper.error(res, 'Erro ao buscar trabalhos.');
         }
     },
-    CadastroLocalizacao: async (req,res) => {
+    CadastroInstrucao: async (req, res) => {
         try {
-            const { predio, sala, ponto_referencia } = req.body;
-        
+            const dadosInstrucao = req.validatedBody || req.body;
+            const novaInstrucao = await AdminService.criarInstrucao(dadosInstrucao);
             
-            if (!predio || !sala || !ponto_referencia ) {
-                return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
-            }
-        
-            const localizacao = await Localizacao.create({
-                predio,
-                sala,
-                ponto_referencia
-            });
-        
-            return res.status(201).json({ mensagem: 'Trabalho criado com sucesso.', local: localizacao });
+            return ResponseHelper.created(res, novaInstrucao, MESSAGES.SUCCESS.GUIA_CREATED);
         } catch (erro) {
-            console.error('Erro ao criar trabalho:', erro);
-            return res.status(500).json({ mensagem: 'Erro interno ao criar trabalho.' });
+            console.error('Erro ao criar instrução:', erro);
+            return ResponseHelper.error(res, MESSAGES.ERROR.INTERNAL_ERROR);
         }
     },
-    InfosTrabalho: async (req,res) => {
+    ListaInstrucao: async (req, res) => {
+        try {
+            const guias = await AdminService.listarInstrucoes();
+            return ResponseHelper.success(res, guias);
+        } catch (error) {
+            console.error(error);
+            return ResponseHelper.error(res, 'Erro ao listar instruções.');
+        }
+    },
+    CadastroLocalizacao: async (req, res) => {
+        try {
+            const dadosLocalizacao = req.validatedBody || req.body;
+            const localizacao = await AdminService.criarLocalizacao(dadosLocalizacao);
+            
+            return ResponseHelper.created(res, localizacao, MESSAGES.SUCCESS.LOCALIZACAO_CREATED);
+        } catch (erro) {
+            console.error('Erro ao criar localização:', erro);
+            return ResponseHelper.error(res, MESSAGES.ERROR.INTERNAL_ERROR);
+        }
+    },
+    InfosTrabalho: async (req, res) => {
         const { id } = req.params;
 
         try {
-        const trabalho = await Trabalho.findByPk(id, {
-            include: [
-            {model: Aluno,
-                as: "alunos", 
-                through: { attributes: [] } },      
-            { model: Professor, as: "Professor"},
-            { model:Localizacao, as: 'Localizacao' },
-            ],
-        });
+            const trabalho = await AdminService.obterInfosTrabalho(id);
 
-        if (!trabalho) {
-            return res.status(404).json({ error: 'Trabalho não encontrado' });
-        }
+            if (!trabalho) {
+                return ResponseHelper.notFound(res, MESSAGES.ERROR.TRABALHO_NOT_FOUND);
+            }
 
-        return res.json(trabalho);
+            return ResponseHelper.success(res, trabalho);
         } catch (error) {
-        console.error('Erro ao buscar trabalho por ID:', error);
-        return res.status(500).json({ error: 'Erro interno do servidor' });
+            console.error('Erro ao buscar trabalho por ID:', error);
+            return ResponseHelper.error(res, MESSAGES.ERROR.INTERNAL_ERROR);
         }
-        },
-        DeletarGuiaSapex: async (req, res) => {
-                const { id } = req.params;
-        
-                try {
-                    const guia = await GuiaSapex.findByPk(id);
-        
-                    if (!guia) {
-                        return res.status(404).json({ message: 'Guia não encontrada.' });
-                    }
-        
-                    await guia.destroy();
-        
-                    return res.status(200).json({ message: 'Guia deletada com sucesso.' });
-                } catch (error) {
-                    console.error(error);
-                    return res.status(500).json({ message: 'Erro ao deletar a guia.' });
-                }
-            },
-        DeletarTrabalho: async (req, res) => {
-                const { id } = req.params;
+    },
+    DeletarGuiaSapex: async (req, res) => {
+        const { id } = req.params;
 
-                try {
-                    const trabalho = await Trabalho.findByPk(id);
+        try {
+            const guia = await AdminService.deletarGuiaSapex(id);
 
-                    if (!trabalho) {
-                        return res.status(404).json({ message: 'Trabalho não encontrado.' });
-                    }
+            if (!guia) {
+                return ResponseHelper.notFound(res, MESSAGES.ERROR.GUIA_NOT_FOUND);
+            }
 
-                    await trabalho.destroy();
+            return ResponseHelper.success(res, null, MESSAGES.SUCCESS.GUIA_DELETED);
+        } catch (error) {
+            console.error(error);
+            return ResponseHelper.error(res, 'Erro ao deletar a guia.');
+        }
+    },
+    DeletarTrabalho: async (req, res) => {
+        const { id } = req.params;
 
-                    return res.status(200).json({ message: 'Trabalho deletado com sucesso.' });
-                } catch (error) {
-                    console.error(error);
-                    return res.status(500).json({ message: 'Erro ao deletar o trabalho.' });
-                }
-            },
-        EditarTrabalho: async (req, res) => {
-                const { id } = req.params;
-                const { titulo, tipo, n_poster, data, horario, localizacao, professor, alunos } = req.body;
+        try {
+            const trabalho = await AdminService.deletarTrabalho(id);
 
-                try {
-                    const trabalho = await Trabalho.findByPk(id);
+            if (!trabalho) {
+                return ResponseHelper.notFound(res, MESSAGES.ERROR.TRABALHO_NOT_FOUND);
+            }
 
-                    if (!trabalho) {
-                        return res.status(404).json({ message: 'Trabalho não encontrado.' });
-                    }
+            return ResponseHelper.success(res, null, MESSAGES.SUCCESS.TRABALHO_DELETED);
+        } catch (error) {
+            console.error(error);
+            return ResponseHelper.error(res, 'Erro ao deletar o trabalho.');
+        }
+    },
+    EditarTrabalho: async (req, res) => {
+        const { id } = req.params;
+        const dadosTrabalho = req.validatedBody || req.body;
 
-                    // Atualizar localização
-                    if (localizacao) {
-                        await Localizacao.update(
-                            {
-                                predio: localizacao.predio,
-                                sala: localizacao.sala,
-                                ponto_referencia: localizacao.ponto_referencia
-                            },
-                            { where: { id: trabalho.localizacao_id } }
-                        );
-                    }
+        try {
+            const trabalho = await AdminService.editarTrabalho(id, dadosTrabalho);
 
-                    // Atualizar professor
-                    if (professor) {
-                        let professorExistente = await Professor.findOne({ where: { email: professor.email } });
-                        
-                        if (!professorExistente) {
-                            professorExistente = await Professor.create({
-                                nome: professor.nome,
-                                email: professor.email,
-                            });
-                        } else {
-                            await Professor.update(
-                                { nome: professor.nome },
-                                { where: { id: professorExistente.id } }
-                            );
-                        }
-                        trabalho.professor_id = professorExistente.id;
-                    }
+            if (!trabalho) {
+                return ResponseHelper.notFound(res, MESSAGES.ERROR.TRABALHO_NOT_FOUND);
+            }
 
-                    // Atualizar alunos
-                    if (alunos && alunos.length > 0) {
-                        await AlunoHasTrabalho.destroy({ where: { trabalhoId: trabalho.id } });
-                        
-                        for (const aluno of alunos) {
-                            let alunoExistente = await Aluno.findOne({ where: { email: aluno.email } });
-                            
-                            if (!alunoExistente) {
-                                alunoExistente = await Aluno.create({
-                                    nome: aluno.nome,
-                                    email: aluno.email,
-                                    turma: 'não informado',
-                                });
-                            }
-                            
-                            await AlunoHasTrabalho.create({
-                                alunoId: alunoExistente.id,
-                                trabalhoId: trabalho.id
-                            });
-                        }
-                    }
-
-                    // Atualizar campos do trabalho
-                    trabalho.titulo = titulo;
-                    trabalho.tipo = tipo;
-                    trabalho.n_poster = n_poster;
-                    trabalho.data = data;
-                    trabalho.horario = horario;
-
-                    await trabalho.save();
-
-                    return res.status(200).json({ message: 'Trabalho atualizado com sucesso.', trabalho });
-                } catch (error) {
-                    console.error(error);
-                    return res.status(500).json({ message: 'Erro ao atualizar o trabalho.' });
-                }
-            },
+            return ResponseHelper.success(res, trabalho, MESSAGES.SUCCESS.TRABALHO_UPDATED);
+        } catch (error) {
+            console.error(error);
+            return ResponseHelper.error(res, 'Erro ao atualizar o trabalho.');
+        }
+    }
 
     };
 
