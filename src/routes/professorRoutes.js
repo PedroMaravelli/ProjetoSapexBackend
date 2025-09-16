@@ -4,8 +4,8 @@ const router = express.Router();
 const ProfessorController = require('../controllers/Professor/professorController');
 const gerarTokenController = require('../controllers/Professor/GerarTokenRequest/gerarTokenController');
 
-const atribuirNotaProfessorMiddleware = require("../middlawares/Professor/atribuirNotaProfessorMiddleware")
-const {atribuirNotaParamsSchema, atribuirNotaBodySchema} = require("../middlawares/schemas/professorSchema")
+const atribuirNotaProfessorMiddleware = require("../middlewares/Professor/atribuirNotaProfessorMiddleware")
+const {atribuirNotaParamsSchema, atribuirNotaBodySchema} = require("../validators/professorValidators")
 
 
 router.get('/:email', ProfessorController.GetProfessor);
