@@ -3,6 +3,9 @@ const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const { EmailHelper } = require("../utils");
 const TokenService = require("./TokenService");
+const EmailTemplates = require("../templates/emailTemplates");
+require('dotenv').config();
+
 
 class AuthService {
   static async loginAdmin(email, senha) {
@@ -65,12 +68,11 @@ class AuthService {
     }
 
     const subject = "Esqueci minha senha"
-    
     const token = TokenService.gerarTokenEsqueciMinhaSenha(email)
-    
-    const link = `${process.env.FRONTEND_URL}/reset-password/${token}`
+    const link = `${process.env.FROND_END_URL}reset-password/${token}`
+    const template = EmailTemplates.resetPasswordTemplate(link)
 
-    const sendEmail = await EmailHelper.sendEmail(subject, email, link)
+    const sendEmail = await EmailHelper.sendEmail(subject, email, template)
 
 
     if(!sendEmail){

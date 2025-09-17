@@ -1,5 +1,8 @@
 const { Op } = require('sequelize');
 const { Trabalho, Aluno, Professor, Localizacao, GuiaSapex, AlunoHasTrabalho } = require('../database/models');
+const { EmailHelper } = require('../utils');
+const EmailTemplates = require('../templates/emailTemplates');
+
 
 class AdminService {
   static async criarTrabalho(dadosTrabalho) {
@@ -30,6 +33,9 @@ class AdminService {
       professor_id: professorExistente.id,
       localizacao_id: novaLocalizacao.id
     });
+    const templateEmailProfessor = EmailTemplates.novoTrabalhoProfessor(professorExistente.nome, novoTrabalho.titulo, novoTrabalho.data, novoTrabalho.horario)
+
+    await EmailHelper.sendEmail("Novo trabalho para avaliação Sapex!!!", professorExistente.email, templateEmailProfessor )
 
     for (const aluno of alunos) {
       let alunoExistente = await Aluno.findOne({ where: { email: aluno.email } });
@@ -46,6 +52,11 @@ class AdminService {
         alunoId: alunoExistente.id,
         trabalhoId: novoTrabalho.id
       });
+
+      const subject = "Você tem um novo trabalho no Sapex"
+      const template = EmailTemplates.novoTrabalhoAlunos(alunoExistente.nome, novoTrabalho.titulo, novoTrabalho.data, novoTrabalho.horario, professorExistente.nome)
+
+      await EmailHelper.sendEmail(subject, alunoExistente.email, template)
     }
 
     return novoTrabalho;
