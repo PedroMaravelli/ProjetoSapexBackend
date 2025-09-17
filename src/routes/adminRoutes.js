@@ -23,6 +23,10 @@ router.delete('/guia/:id', AdminController.DeletarGuiaSapex)
 router.delete('/trabalho/:id', AdminController.DeletarTrabalho)
 
 router.put('/trabalho/editar/:id', AdminController.EditarTrabalho)
+router.put('/alterarsenha', AuthAdminController.AlterarSenha)
+
+
+router.post('/esquecisenha', AuthAdminController.EsqueciMinhaSenha)
 
 
 module.exports = router;

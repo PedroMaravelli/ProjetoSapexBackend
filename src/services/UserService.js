@@ -16,7 +16,7 @@ class UserService {
         return USER_ROLES.ALUNO;
         }
 
-         if (emailLower.endsWith(EMAIL_DOMAINS.PROFESSOR) || emailLower.endsWith(EMAIL_DOMAINS.GMAIL)) {
+        if (emailLower.endsWith(EMAIL_DOMAINS.PROFESSOR) || emailLower.endsWith(EMAIL_DOMAINS.GMAIL)) {
             return USER_ROLES.PROFESSOR;
         }
 
