@@ -20,6 +20,10 @@ class TokenService {
   static gerarTokenLocal(trabalhoId) {
     return jwt.sign({ trabalho_id: trabalhoId }, process.env.JWT_SECRET, { expiresIn: '1h' });
   }
+
+  static gerarTokenEsqueciMinhaSenha(email){
+    return jwt.sign({ email: email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  }
 }
 
 module.exports = TokenService;

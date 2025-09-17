@@ -31,7 +31,7 @@ const AuthAdminController = {
             return ResponseHelper.error(res, 'Erro ao fazer login.');
         }
     },
-    alterarSenha: async (req, res) => {
+    AlterarSenha: async (req, res) => {
         try {
             const { email, senha } = req.body;
 
@@ -50,6 +50,23 @@ const AuthAdminController = {
             return ResponseHelper.error(res, 'Erro ao alterar a senha.');
         }
     },
+    EsqueciMinhaSenha: async (req, res) => {
+        try {
+            const { email } = req.body;
+
+            const enviarEmail = await AuthService.esqueciSenhaAdmin(email)
+
+
+            if (!enviarEmail) {
+                return ResponseHelper.badRequest(res, 'Email não enviado.');
+            }
+            return ResponseHelper.success(res, null, 'Email enviado com sucesso.');
+
+        } catch (error) {
+            return ResponseHelper.error(res, 'Erro do servidor ao enviar email.');
+            
+        }
+    }
 }
 
 module.exports = AuthAdminController;  

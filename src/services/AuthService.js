@@ -1,6 +1,8 @@
-const { Admin } = require("../database/models");
+const { Admin, Aluno } = require("../database/models");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
+const { EmailHelper } = require("../utils");
+const TokenService = require("./TokenService");
 
 class AuthService {
   static async loginAdmin(email, senha) {
@@ -52,6 +54,30 @@ class AuthService {
     await Admin.update({ senha: hashSenha }, { where: { email } });
 
     return admin;
+  }
+
+  static async esqueciSenhaAdmin(email){
+
+    const admin = await Aluno.findOne({ where: { email } });
+
+    if(!admin){
+      return null
+    }
+
+    const subject = "Esqueci minha senha"
+    
+    const token = TokenService.gerarTokenEsqueciMinhaSenha(email)
+    
+    const link = `${process.env.FRONTEND_URL}/reset-password/${token}`
+
+    const sendEmail = await EmailHelper.sendEmail(subject, email, link)
+
+
+    if(!sendEmail){
+      return null
+    }
+    return sendEmail
+
   }
 }
 
