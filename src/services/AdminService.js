@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Trabalho, Aluno, Professor, Localizacao, GuiaSapex, AlunoHasTrabalho } = require('../database/models');
+const { Trabalho, Aluno, Professor, Localizacao, GuiaSapex, AlunoHasTrabalho, Admin } = require('../database/models');
 const { EmailHelper } = require('../utils');
 const EmailTemplates = require('../templates/emailTemplates');
 
@@ -194,6 +194,11 @@ class AdminService {
       ponto_referencia
     });
   }
+
+  static async listarAdministradores(){
+    return await Admin.findAll()
+  }
+
 }
 
 module.exports = AdminService;

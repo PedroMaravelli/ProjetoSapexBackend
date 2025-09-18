@@ -61,7 +61,7 @@ class AuthService {
 
   static async esqueciSenhaAdmin(email){
 
-    const admin = await Aluno.findOne({ where: { email } });
+    const admin = await Admin.findOne({ where: { email } });
 
     if(!admin){
       return null
@@ -69,7 +69,7 @@ class AuthService {
 
     const subject = "Esqueci minha senha"
     const token = TokenService.gerarTokenEsqueciMinhaSenha(email)
-    const link = `${process.env.FROND_END_URL}reset-password/${token}`
+    const link = `${process.env.FROND_END_URL}admin/alterar-senha/${token}`
     const template = EmailTemplates.resetPasswordTemplate(link)
 
     const sendEmail = await EmailHelper.sendEmail(subject, email, template)
@@ -79,6 +79,26 @@ class AuthService {
       return null
     }
     return sendEmail
+
+  }
+
+  static async cadastroAdmin(nome, email, senha){
+
+    const adminExist = await Admin.findOne({ where: { email } });
+
+    if(adminExist){
+      return null
+    }
+
+    const hashSenha = await bcrypt.hash(senha, 10);
+
+    const admin = await Admin.create({
+      nome,
+      email,
+      senha: hashSenha
+    });
+
+    return admin
 
   }
 }

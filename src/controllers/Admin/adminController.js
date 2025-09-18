@@ -119,6 +119,16 @@ const AdminController = {
             console.error(error);
             return ResponseHelper.error(res, 'Erro ao atualizar o trabalho.');
         }
+    },
+    ListarAdministradores: async (req,res) => {
+        try {
+
+            const administradores = await AdminService.listarAdministradores(); 
+            return ResponseHelper.success(res, administradores);
+        } catch (error) {
+            console.error(error);
+            return ResponseHelper.error(res, 'Erro ao listar administradores.');
+        }
     }
 
     };
