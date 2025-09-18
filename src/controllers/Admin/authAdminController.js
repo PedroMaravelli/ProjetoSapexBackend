@@ -31,6 +31,25 @@ const AuthAdminController = {
             return ResponseHelper.error(res, 'Erro ao fazer login.');
         }
     },
+    CadastroAdmin: async (req, res) => {
+        try {
+            const { nome, email, senha } = req.body;
+
+            if (!email || !senha || !nome) {
+                return ResponseHelper.badRequest(res, 'Email e senha são obrigatórios.');
+            }
+
+            const admin = await AuthService.cadastroAdmin(nome, email, senha);
+
+            if (!admin) {
+                return ResponseHelper.badRequest(res, 'Erro ao cadastrar admin.');
+            }
+
+            return ResponseHelper.success(res, null, 'Admin cadastrado com sucesso.');
+        } catch (error) {
+            return ResponseHelper.error(res, 'Erro ao cadastrar admin.');
+        }
+    },
     AlterarSenha: async (req, res) => {
         try {
             const { email, senha } = req.body;
@@ -55,7 +74,6 @@ const AuthAdminController = {
             const { email } = req.body;
 
             const enviarEmail = await AuthService.esqueciSenhaAdmin(email)
-
 
             if (!enviarEmail) {
                 return ResponseHelper.badRequest(res, 'Email não enviado.');
