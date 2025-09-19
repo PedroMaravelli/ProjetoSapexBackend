@@ -81,25 +81,14 @@ class ProfessorService {
 
   static async obterNotaAluno(token) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const { email_aluno, trabalho_id } = decoded;
+    const { trabalho_id } = decoded;
 
-    if (!email_aluno || !trabalho_id) {
-      throw new Error('Email do aluno e ID do trabalho são obrigatórios.');
-    }
-    
-    const aluno = await Aluno.findOne({ 
-      where: { 
-        email: email_aluno 
-      }
-    });
-
-    if (!aluno) {
-      return null;
+    if (!trabalho_id) {
+      throw new Error('ID do trabalho é obrigatório.');
     }
 
-    const relacao = await AlunoHasTrabalho.findOne({
+    const relacoes = await AlunoHasTrabalho.findAll({
       where: {
-        aluno_id: aluno.id,
         trabalho_id,
       },
       include: [
@@ -114,16 +103,16 @@ class ProfessorService {
       ]
     });
 
-    if (!relacao) {
+    if (!relacoes || relacoes.length === 0) {
       return null;
     }
 
-    return {
+    return relacoes.map(relacao => ({
       nota: relacao.nota,
       justificativa_nota: relacao.justificativa_nota,
       trabalho: relacao.trabalho,
       aluno: relacao.aluno
-    };
+    }));
   }
 
   static async obterLocalizacaoTrabalho(token) {
@@ -144,6 +133,15 @@ class ProfessorService {
     }
 
     return trabalho.Localizacao;
+  }
+
+  static async editarNota(alunoId, trabalhoId, nota, justificativaNota) {
+    const [updated] = await AlunoHasTrabalho.update(
+      { nota, justificativa_nota: justificativaNota },
+      { where: { aluno_id: alunoId, trabalho_id: trabalhoId } }
+    );
+
+    return updated > 0;
   }
 }
 
