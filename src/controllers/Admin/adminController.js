@@ -1,184 +1,136 @@
-const { Trabalho, Aluno, Professor, Localizacao, Admin, GuiaSapex, AlunoHasTrabalho } = require('../../database/models');  // Importando todos os modelos necessário
-
-
+const AdminService = require('../../services/AdminService');
+const ResponseHelper = require('../../utils/ResponseHelper');
+const { MESSAGES } = require('../../constants');
 
 const AdminController = {
     CadastroTrabalhos: async (req, res) => {
         try {
-        const { titulo, tipo, n_poster, data, horario, localizacao, professor, alunos } = req.body;
-
-        const novaLocalizacao = await Localizacao.create({
-            predio: localizacao.predio,
-            sala: localizacao.sala,
-            ponto_referencia: localizacao.ponto_referencia
-        });
-
-
-        let professorExistente = await Professor.findOne({ where: { email: professor.email } });
-
-        if (!professorExistente) {
-            professorExistente = await Professor.create({
-                nome: professor.nome,
-                email: professor.email,
-            });
+            const dadosTrabalho = req.validatedBody || req.body;
+            const novoTrabalho = await AdminService.criarTrabalho(dadosTrabalho);
+            
+            return ResponseHelper.created(res, novoTrabalho, MESSAGES.SUCCESS.TRABALHO_CREATED);
+        } catch (erro) {
+            console.error('Erro ao criar trabalho:', erro);
+            return ResponseHelper.error(res, MESSAGES.ERROR.INTERNAL_ERROR);
         }
-
-
-        const novoTrabalho = await Trabalho.create({
-            titulo,
-            tipo,
-            turma: req.body.turma || null,
-            n_poster,
-            data,
-            horario,
-            professor_id: professorExistente.id,
-            localizacao_id: novaLocalizacao.id
-        });
-
-        for (const aluno of alunos) {
-
-            let alunoExistente = await Aluno.findOne({ where: { email: aluno.email } });
-
-            if (!alunoExistente) {
-                alunoExistente = await Aluno.create({
-                    nome: aluno.nome,
-                    email: aluno.email,
-                    turma: req.body.turma || 'não informado',
-                });
-            }
-
-            await AlunoHasTrabalho.create({
-                alunoId: alunoExistente.id,
-                trabalhoId: novoTrabalho.id
-            });
-        }
-
-        return res.status(201).json({ mensagem: 'Trabalho cadastrado com sucesso.', trabalho: novoTrabalho });
-
-    } catch (erro) {
-        console.error('Erro ao criar trabalho:', erro);
-        return res.status(500).json({ mensagem: 'Erro interno ao criar trabalho.' });
-    }
     },
 
     ListaTrabalhos: async (req, res) => {
         try {
-
-            const trabalhos = await Trabalho.findAll({
-                include: [
-                    
-                    { model: Professor, as: "Professor",attributes: ['id', 'nome'] },
-                    { model: Localizacao, as: "Localizacao", attributes: ['id', 'predio'] },
-                
-                ]
-            });
-    
-            return res.status(200).json(trabalhos);
+            const trabalhos = await AdminService.listarTrabalhos();
+            return ResponseHelper.success(res, trabalhos);
         } catch (error) {
-
             console.error(error);
-            return res.status(500).json({
-                mensagem: 'Erro ao listar os trabalhos.',
-                erro: error.message
-            });
+            return ResponseHelper.error(res, 'Erro ao buscar trabalhos.');
         }
     },
-    CadastroInstrucao: async (req,res) => {
+    CadastroInstrucao: async (req, res) => {
         try {
-            const { titulo, descricao } = req.body;
-        
-            const novaInstrucao = await GuiaSapex.create({
-                titulo,
-                descricao
-            });
-        
-            return res.status(201).json({ mensagem: 'Trabalho criado com sucesso.', instrucao: novaInstrucao });
-        } catch (erro) {
-            console.error('Erro ao criar trabalho:', erro);
-            return res.status(500).json({ mensagem: 'Erro interno ao criar trabalho.' });
-        }
-    
-
-    },
-    ListaInstrucao: async (req,res) => {
-        try {
+            const dadosInstrucao = req.validatedBody || req.body;
+            const novaInstrucao = await AdminService.criarInstrucao(dadosInstrucao);
             
-            const guias = await GuiaSapex.findAll()
-    
-
-            return res.status(200).json(guias);
+            return ResponseHelper.created(res, novaInstrucao, MESSAGES.SUCCESS.GUIA_CREATED);
+        } catch (erro) {
+            console.error('Erro ao criar instrução:', erro);
+            return ResponseHelper.error(res, MESSAGES.ERROR.INTERNAL_ERROR);
+        }
+    },
+    ListaInstrucao: async (req, res) => {
+        try {
+            const guias = await AdminService.listarInstrucoes();
+            return ResponseHelper.success(res, guias);
         } catch (error) {
-
             console.error(error);
-            return res.status(500).json({
-                mensagem: 'Erro ao listar Intruções.',
-                erro: error.message
-            });
+            return ResponseHelper.error(res, 'Erro ao listar instruções.');
         }
     },
-    CadastroLocalizacao: async (req,res) => {
+    CadastroLocalizacao: async (req, res) => {
         try {
-            const { predio, sala, ponto_referencia } = req.body;
-        
+            const dadosLocalizacao = req.validatedBody || req.body;
+            const localizacao = await AdminService.criarLocalizacao(dadosLocalizacao);
             
-            if (!predio || !sala || !ponto_referencia ) {
-                return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' });
-            }
-        
-            const localizacao = await Localizacao.create({
-                predio,
-                sala,
-                ponto_referencia
-            });
-        
-            return res.status(201).json({ mensagem: 'Trabalho criado com sucesso.', local: localizacao });
+            return ResponseHelper.created(res, localizacao, MESSAGES.SUCCESS.LOCALIZACAO_CREATED);
         } catch (erro) {
-            console.error('Erro ao criar trabalho:', erro);
-            return res.status(500).json({ mensagem: 'Erro interno ao criar trabalho.' });
+            console.error('Erro ao criar localização:', erro);
+            return ResponseHelper.error(res, MESSAGES.ERROR.INTERNAL_ERROR);
         }
     },
-    InfosTrabalho: async (req,res) => {
+    InfosTrabalho: async (req, res) => {
         const { id } = req.params;
 
         try {
-        const trabalho = await Trabalho.findByPk(id, {
-            include: [
-            {model: Aluno,
-                as: "alunos", 
-                through: { attributes: [] } },      
-            { model: Professor, as: "Professor"},
-            { model:Localizacao, as: 'Localizacao' },
-            ],
-        });
+            const trabalho = await AdminService.obterInfosTrabalho(id);
 
-        if (!trabalho) {
-            return res.status(404).json({ error: 'Trabalho não encontrado' });
-        }
-
-        return res.json(trabalho);
-        } catch (error) {
-        console.error('Erro ao buscar trabalho por ID:', error);
-        return res.status(500).json({ error: 'Erro interno do servidor' });
-        }
-        },
-        DeletarGuiaSapex: async (req, res) => {
-                const { id } = req.params;
-        
-                try {
-                    const guia = await GuiaSapex.findByPk(id);
-        
-                    if (!guia) {
-                        return res.status(404).json({ message: 'Guia não encontrada.' });
-                    }
-        
-                    await guia.destroy();
-        
-                    return res.status(200).json({ message: 'Guia deletada com sucesso.' });
-                } catch (error) {
-                    console.error(error);
-                    return res.status(500).json({ message: 'Erro ao deletar a guia.' });
-                }
+            if (!trabalho) {
+                return ResponseHelper.notFound(res, MESSAGES.ERROR.TRABALHO_NOT_FOUND);
             }
+
+            return ResponseHelper.success(res, trabalho);
+        } catch (error) {
+            console.error('Erro ao buscar trabalho por ID:', error);
+            return ResponseHelper.error(res, MESSAGES.ERROR.INTERNAL_ERROR);
+        }
+    },
+    DeletarGuiaSapex: async (req, res) => {
+        const { id } = req.params;
+
+        try {
+            const guia = await AdminService.deletarGuiaSapex(id);
+
+            if (!guia) {
+                return ResponseHelper.notFound(res, MESSAGES.ERROR.GUIA_NOT_FOUND);
+            }
+
+            return ResponseHelper.success(res, null, MESSAGES.SUCCESS.GUIA_DELETED);
+        } catch (error) {
+            console.error(error);
+            return ResponseHelper.error(res, 'Erro ao deletar a guia.');
+        }
+    },
+    DeletarTrabalho: async (req, res) => {
+        const { id } = req.params;
+
+        try {
+            const trabalho = await AdminService.deletarTrabalho(id);
+
+            if (!trabalho) {
+                return ResponseHelper.notFound(res, MESSAGES.ERROR.TRABALHO_NOT_FOUND);
+            }
+
+            return ResponseHelper.success(res, null, MESSAGES.SUCCESS.TRABALHO_DELETED);
+        } catch (error) {
+            console.error(error);
+            return ResponseHelper.error(res, 'Erro ao deletar o trabalho.');
+        }
+    },
+    EditarTrabalho: async (req, res) => {
+        const { id } = req.params;
+        const dadosTrabalho = req.validatedBody || req.body;
+
+        try {
+            const trabalho = await AdminService.editarTrabalho(id, dadosTrabalho);
+
+            if (!trabalho) {
+                return ResponseHelper.notFound(res, MESSAGES.ERROR.TRABALHO_NOT_FOUND);
+            }
+
+            return ResponseHelper.success(res, trabalho, MESSAGES.SUCCESS.TRABALHO_UPDATED);
+        } catch (error) {
+            console.error(error);
+            return ResponseHelper.error(res, 'Erro ao atualizar o trabalho.');
+        }
+    },
+    ListarAdministradores: async (req,res) => {
+        try {
+
+            const administradores = await AdminService.listarAdministradores(); 
+            return ResponseHelper.success(res, administradores);
+        } catch (error) {
+            console.error(error);
+            return ResponseHelper.error(res, 'Erro ao listar administradores.');
+        }
+    }
+
     };
 
 module.exports = AdminController;  

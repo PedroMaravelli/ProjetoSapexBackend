@@ -1,6 +1,6 @@
 const passport = require('passport');
 const JwtService = require('../config/jwtConfig');
-const UserService = require('../service/userService');
+const UserService = require('../services/UserService');
 require('dotenv').config()
 
 const { Aluno, Professor } = require('../database/models');
