@@ -1,26 +1,28 @@
-
-const jwt = require('jsonwebtoken');
+const TokenService = require('../../../services/TokenService');
+const ResponseHelper = require('../../../utils/ResponseHelper');
 
 const gerarTokenController = {
-     GerarToken: async (req,res) =>{
-    
-            const { aluno_email, trabalho_id } = req.params;
-            if (!aluno_email || !trabalho_id) {
-                return res.status(400).json({ message: 'Parâmetros insuficientes.' });
-            }
-            const token = jwt.sign({ aluno_email, trabalho_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-            return res.json({ token });
-        },
-    
-        GerarTokenViewLocal: async (req,res) =>{
-    
-            const { trabalho_id } = req.params;
-            if (!trabalho_id) {
-                return res.status(400).json({ message: 'Parâmetros insuficientes.' });
-            }
-            const token = jwt.sign({trabalho_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-            return res.json({ token });
-        },
+    GerarToken: async (req, res) => {
+        const { aluno_email, trabalho_id } = req.params;
+        
+        if (!aluno_email || !trabalho_id) {
+            return ResponseHelper.badRequest(res, 'Parâmetros insuficientes.');
+        }
+        
+        const token = TokenService.gerarTokenAluno(aluno_email, trabalho_id);
+        return ResponseHelper.success(res, { token });
+    },
+
+    GerarTokenViewLocal: async (req, res) => {
+        const { trabalho_id } = req.params;
+        
+        if (!trabalho_id) {
+            return ResponseHelper.badRequest(res, 'Parâmetros insuficientes.');
+        }
+        
+        const token = TokenService.gerarTokenViewLocal(trabalho_id);
+        return ResponseHelper.success(res, { token });
+    },
 }
 
 module.exports = gerarTokenController;  
