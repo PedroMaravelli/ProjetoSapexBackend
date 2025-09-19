@@ -23,6 +23,8 @@ router.get("/local/gerartoken/:trabalho_id", gerarTokenController.GerarTokenLoca
 
 router.post('/nota/aluno/:alunoId/trabalho/:trabalhoId',atribuirNotaProfessorMiddleware({params:atribuirNotaParamsSchema, body:atribuirNotaBodySchema}), ProfessorController.AtribuirNota);
 
+router.put('/nota/aluno/:alunoId/trabalho/:trabalhoId',atribuirNotaProfessorMiddleware({params:atribuirNotaParamsSchema, body:atribuirNotaBodySchema}), ProfessorController.EditarNota)
+
 
 
 

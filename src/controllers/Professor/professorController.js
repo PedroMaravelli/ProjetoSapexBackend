@@ -114,6 +114,23 @@ const ProfessorController = {
             return ResponseHelper.error(res, 'Erro ao buscar a localização.');
         }
     },
+    EditarNota: async (req,res) => {
+        try {
+            const { alunoId, trabalhoId } = req.params;
+            const { nota, justificativa_nota } = req.body;
+
+            const atualizarNota = await ProfessorService.editarNota(alunoId, trabalhoId, nota, justificativa_nota);
+            
+            if (!atualizarNota) {
+                return ResponseHelper.notFound(res, 'Associação aluno/trabalho não encontrada.');
+            }
+
+            return ResponseHelper.success(res, atualizarNota, 'Nota editada com sucesso!!!');
+        } catch (error) {
+            console.log(error);
+            return ResponseHelper.error(res, 'Erro ao editar a nota!!!');
+        }
+    }
 
 }
 
