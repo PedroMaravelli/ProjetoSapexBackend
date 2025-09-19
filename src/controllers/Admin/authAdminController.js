@@ -1,0 +1,90 @@
+const AuthService = require('../../services/AuthService');
+const ResponseHelper = require('../../utils/ResponseHelper');
+const { MESSAGES } = require('../../constants');
+
+const AuthAdminController = {
+    login: async (req, res) => {
+        try {
+            const { email, senha } = req.body;
+
+            if (!email || !senha) {
+                return ResponseHelper.badRequest(res, 'Email e senha são obrigatórios.');
+            }
+
+            const result = await AuthService.loginAdmin(email, senha);
+
+            if (!result) {
+                return ResponseHelper.badRequest(res, 'Usuário não encontrado.');
+            }
+
+            if (result.error) {
+                return ResponseHelper.badRequest(res, result.error);
+            }
+
+            return ResponseHelper.success(res, {
+                message: 'Login realizado com sucesso!',
+                admin: result.admin,
+                token: result.token
+            });
+        } catch (error) {
+            console.error(error);
+            return ResponseHelper.error(res, 'Erro ao fazer login.');
+        }
+    },
+    CadastroAdmin: async (req, res) => {
+        try {
+            const { nome, email, senha } = req.body;
+
+            if (!email || !senha || !nome) {
+                return ResponseHelper.badRequest(res, 'Email e senha são obrigatórios.');
+            }
+
+            const admin = await AuthService.cadastroAdmin(nome, email, senha);
+
+            if (!admin) {
+                return ResponseHelper.badRequest(res, 'Erro ao cadastrar admin.');
+            }
+
+            return ResponseHelper.success(res, null, 'Admin cadastrado com sucesso.');
+        } catch (error) {
+            return ResponseHelper.error(res, 'Erro ao cadastrar admin.');
+        }
+    },
+    AlterarSenha: async (req, res) => {
+        try {
+            const { email, senha } = req.body;
+
+            if (!email || !senha) {
+                return ResponseHelper.badRequest(res, 'Email e senha são obrigatórios.');
+            }
+
+            const admin = await AuthService.alterarSenhaAdmin(email, senha);
+
+            if (!admin) {
+                return ResponseHelper.notFound(res, 'Admin não encontrado.');
+            }
+
+            return ResponseHelper.success(res, null, 'Senha alterada com sucesso.');
+        } catch (error) {
+            return ResponseHelper.error(res, 'Erro ao alterar a senha.');
+        }
+    },
+    EsqueciMinhaSenha: async (req, res) => {
+        try {
+            const { email } = req.body;
+
+            const enviarEmail = await AuthService.esqueciSenhaAdmin(email)
+
+            if (!enviarEmail) {
+                return ResponseHelper.badRequest(res, 'Email não enviado.');
+            }
+            return ResponseHelper.success(res, null, 'Email enviado com sucesso.');
+
+        } catch (error) {
+            return ResponseHelper.error(res, 'Erro do servidor ao enviar email.');
+            
+        }
+    }
+}
+
+module.exports = AuthAdminController;  
