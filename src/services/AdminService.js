@@ -224,6 +224,7 @@ class AdminService {
       
     } catch (error) {
       console.error('Erro no cadastro em lote:', error);
+      await fs.unlink(caminhoArquivo);
       return false;
     }
   }
