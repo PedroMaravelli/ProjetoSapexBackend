@@ -1,7 +1,8 @@
 const { Op } = require('sequelize');
 const { Trabalho, Aluno, Professor, Localizacao, GuiaSapex, AlunoHasTrabalho, Admin } = require('../database/models');
-const { EmailHelper } = require('../utils');
+const { EmailHelper, formatXlsxToJsonHelper } = require('../utils');
 const EmailTemplates = require('../templates/emailTemplates');
+const fs = require('fs').promises;
 
 
 class AdminService {
@@ -199,6 +200,34 @@ class AdminService {
     return await Admin.findAll()
   }
 
+  static async cadastroTrabalhosEmLote(caminhoArquivo){
+    try {
+      const trabalhosJsonFormat = formatXlsxToJsonHelper.format(caminhoArquivo); 
+      
+      for (const trabalho of trabalhosJsonFormat) {
+        const dadosTrabalho = {
+          titulo: trabalho.titulo,
+          tipo: trabalho.tipo,
+          n_poster: trabalho.n_poster,
+          data: trabalho.data,
+          horario: trabalho.horario,
+          turma: trabalho.turma,
+          localizacao: trabalho.localizacao,
+          professor: trabalho.professor,
+          alunos: trabalho.alunos
+        };
+        await AdminService.criarTrabalho(dadosTrabalho);
+      }
+      
+      await fs.unlink(caminhoArquivo);
+      return true;
+      
+    } catch (error) {
+      console.error('Erro no cadastro em lote:', error);
+      await fs.unlink(caminhoArquivo);
+      return false;
+    }
+  }
 }
 
 module.exports = AdminService;
