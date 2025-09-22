@@ -1,6 +1,7 @@
 const AdminService = require('../../services/AdminService');
 const ResponseHelper = require('../../utils/ResponseHelper');
 const { MESSAGES } = require('../../constants');
+const path = require('path');
 
 const AdminController = {
     CadastroTrabalhos: async (req, res) => {
@@ -128,6 +129,25 @@ const AdminController = {
         } catch (error) {
             console.error(error);
             return ResponseHelper.error(res, 'Erro ao listar administradores.');
+        }
+    },
+
+    CadastroTrabalhosEmLote: async (req, res) => {
+        try {
+            if(!req.file){
+                return ResponseHelper.error(res, 'Arquivo Não encontrado');
+            }
+            const caminhoArquivo = path.resolve(req.file.path)
+
+            const cadastroEmLote = await AdminService.cadastroTrabalhosEmLote(caminhoArquivo)
+
+            if(!cadastroEmLote){
+                return ResponseHelper.notFound(res, 'Não foi possivel processar a planilha');
+            }
+            return ResponseHelper.success(res, MESSAGES.SUCCESS.TRABALHO_CREATED);
+
+        } catch (error) {
+            return ResponseHelper.error(res, MESSAGES.ERROR.INTERNAL_ERROR);
         }
     }
 
