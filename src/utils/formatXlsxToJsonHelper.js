@@ -45,7 +45,7 @@ const { cadastroTrabalhosSchema } = require('../validators/adminValidators');
                         data: formatXlsxToJsonHelper.parseDateExcel(row['Data'] || row['data']),
                         turma: row['Turma'] || row['turma'] || null,
                         horario: row['Horário'] || row['Horario'] || row['horario'] || null,
-                        n_poster: row['Nº Pôster'] || row['N Poster'] || row['n_poster'] || null,
+                        n_poster: row['Nº Pôster'] || row['N Poster'] || row['n_poster'] || 0,
                         localizacao: {
                         predio: row['Prédio'] || row['Predio'] || null,
                         sala: row['Sala'] || null,
