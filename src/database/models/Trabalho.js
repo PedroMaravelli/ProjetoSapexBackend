@@ -5,7 +5,9 @@ module.exports = (sequelize, DataTypes) => {
     tipo: DataTypes.STRING(45),
     n_poster: DataTypes.INTEGER,
     data: DataTypes.DATE,
-    horario: DataTypes.STRING(45)
+    horario: DataTypes.STRING(45),
+    likes_count: { type: DataTypes.INTEGER, defaultValue: 0 },
+    comentarios_count: { type: DataTypes.INTEGER, defaultValue: 0 }
   }, {
     freezeTableName: true,
     timestamps: false
@@ -27,6 +29,21 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'Trabalho_id',
       otherKey: 'Aluno_id',
       as: 'alunos'
+    });
+
+    Trabalho.hasMany(models.Comentario, {
+      foreignKey: 'trabalho_id',
+      as: 'comentarios'
+    });
+
+    Trabalho.hasMany(models.TrabalhoLike, {
+      foreignKey: 'trabalho_id',
+      as: 'likes'
+    });
+
+    Trabalho.hasMany(models.TrabalhoSalvo, {
+      foreignKey: 'trabalho_id',
+      as: 'salvos'
     });
   };
 

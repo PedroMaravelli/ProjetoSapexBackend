@@ -2,6 +2,7 @@ const { Op } = require("sequelize");
 const { Aluno, Trabalho, AlunoHasTrabalho, Professor } = require("../database/models");
 const jwt = require('jsonwebtoken');
 
+
 class AlunoService {
   static async obterTodosTrabalhos() {
     const anoAtual = new Date().getFullYear();

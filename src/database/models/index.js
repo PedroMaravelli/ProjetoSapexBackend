@@ -34,6 +34,10 @@ db.GuiaSapex = require('./GuiaSapex')(sequelize, DataTypes);
 db.AdminHasTrabalho = require('./AdminHasTrabalho')(sequelize, DataTypes);
 db.AdminHasGuiaSapex = require('./AdminHasGuiaSapex')(sequelize, DataTypes);
 db.AlunoHasTrabalho = require('./AlunoHasTrabalho')(sequelize, DataTypes);
+db.Comentario = require('./Comentario')(sequelize, DataTypes);
+db.ComentarioLike = require('./ComentarioLike')(sequelize, DataTypes);
+db.TrabalhoLike = require('./TrabalhoLike')(sequelize, DataTypes);
+db.TrabalhoSalvo = require('./TrabalhoSalvo')(sequelize, DataTypes);
 
 // Executando associações
 Object.keys(db).forEach(modelName => {

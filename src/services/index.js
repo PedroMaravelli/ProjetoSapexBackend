@@ -4,6 +4,8 @@ const AlunoService = require('./AlunoService');
 const ProfessorService = require('./ProfessorService');
 const AuthService = require('./AuthService');
 const TokenService = require('./TokenService');
+const InteracoesTrabalhoService = require('./InteracoesTrabalhoService');
+
 
 module.exports = {
   AdminService,
@@ -11,5 +13,7 @@ module.exports = {
   AlunoService,
   ProfessorService,
   AuthService,
-  TokenService
+  TokenService,
+  InteracoesTrabalhoService
+  
 };

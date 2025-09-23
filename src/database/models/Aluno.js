@@ -19,6 +19,26 @@ module.exports = (sequelize, DataTypes) => {
       otherKey: 'Trabalho_id',
       as: 'trabalhos'
     });
+
+    Aluno.hasMany(models.Comentario, {
+      foreignKey: 'usuario_id',
+      as: 'comentarios'
+    });
+
+    Aluno.hasMany(models.TrabalhoLike, {
+      foreignKey: 'usuario_id',
+      as: 'trabalhos_curtidos'
+    });
+
+    Aluno.hasMany(models.ComentarioLike, {
+      foreignKey: 'usuario_id',
+      as: 'comentarios_curtidos'
+    });
+
+    Aluno.hasMany(models.TrabalhoSalvo, {
+      foreignKey: 'usuario_id',
+      as: 'trabalhos_salvos'
+    });
   };
 
   return Aluno;
