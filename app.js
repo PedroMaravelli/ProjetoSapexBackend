@@ -9,6 +9,7 @@ const passport = require('./src/config/passport');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const cors = require('cors');
+const authMiddleware = require('./src/middlewares/authMiddleware')
 require('dotenv').config()
 
 app.use(cors({
@@ -40,8 +41,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use('/', AuthGoogleRoutes );
 app.use('/admin', AdminRoutes );
-app.use('/prof', ProfessorRoutes );
-app.use('/aluno', AlunoRoutes );
+app.use('/prof', authMiddleware, ProfessorRoutes );
+app.use('/aluno', authMiddleware, AlunoRoutes );
 
 
 
