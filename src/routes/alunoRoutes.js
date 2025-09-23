@@ -13,6 +13,7 @@ router.get("/trabalhos", AlunoController.TodosTrabalhos)
 router.get("/meustrabalhos/:aluno_email", AlunoController.MeusTrabalhos)
 router.get("/localizacao/:token", ProfessorController.LocalizacaoTrabalho)
 router.get("/nota/:token", AlunoController.NotaAluno)
+router.get("/comentarios/:trabalho_id", AlunoController.ComentariosTrabalho)
 
 router.get("/gerartoken/:aluno_email/:trabalho_id", gerarTokenController.GerarToken)
 router.get("/local/gerartoken/:trabalho_id", gerarTokenController.GerarTokenViewLocal )

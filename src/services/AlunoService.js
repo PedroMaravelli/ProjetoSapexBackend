@@ -90,6 +90,20 @@ class AlunoService {
       aluno: relacao.aluno
     };
   }
+  static async obterComentariosTrabalho(trabalho_id){
+    const trabalhoExiste = await Trabalho.findByPk(trabalho_id);
+
+    if(!trabalhoExiste){
+      return false
+    }
+
+    const comentarios = await Comentarios.findAll({
+      where: {
+        trabalho_id: trabalho_id
+      }
+    })
+    return comentarios;
+  }
 }
 
 module.exports = AlunoService;
