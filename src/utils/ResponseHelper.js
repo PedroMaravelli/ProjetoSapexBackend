@@ -39,6 +39,13 @@ class ResponseHelper {
       errors
     });
   }
+  static unauthorized(res, message = 'Não autorizado', errors = null) {
+    return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      success: false,
+      message,
+      errors
+    });
+  }
 }
 
 module.exports = ResponseHelper;
