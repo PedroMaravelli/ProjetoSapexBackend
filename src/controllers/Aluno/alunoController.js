@@ -48,6 +48,20 @@ const AlunoController = {
             console.error('Erro ao buscar nota:', error);
             return ResponseHelper.error(res, 'Erro ao buscar nota do aluno.');
         }
+    },
+    ComentariosTrabalho: async (req,res) => {
+        try {
+            const { trabalho_id } = req.params;
+
+            if (!trabalho_id) {
+                return ResponseHelper.badRequest(res, "ID do trabalho não fornecido");
+            }
+            const comentarios = await AlunoService.obterComentariosTrabalho(trabalho_id);
+
+            return ResponseHelper.success(res, comentarios);
+        } catch (error) {
+            return ResponseHelper.error(res, "Erro ao buscar comentários");
+        }
     }
 }
 
