@@ -2,6 +2,7 @@ const { Op } = require("sequelize");
 const { Aluno, Trabalho, AlunoHasTrabalho, Professor } = require("../database/models");
 const jwt = require('jsonwebtoken');
 
+
 class AlunoService {
   static async obterTodosTrabalhos() {
     const anoAtual = new Date().getFullYear();
@@ -89,20 +90,6 @@ class AlunoService {
       trabalho: relacao.trabalho,
       aluno: relacao.aluno
     };
-  }
-  static async obterComentariosTrabalho(trabalho_id){
-    const trabalhoExiste = await Trabalho.findByPk(trabalho_id);
-
-    if(!trabalhoExiste){
-      return false
-    }
-
-    const comentarios = await Comentarios.findAll({
-      where: {
-        trabalho_id: trabalho_id
-      }
-    })
-    return comentarios;
   }
 }
 

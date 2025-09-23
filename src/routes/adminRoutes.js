@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const AdminController = require('../controllers/Admin/adminController');  
 const validationMiddleware = require('../middlewares/validationMiddleware');
+const authAdminMiddleware = require('../middlewares/authAdminMiddleware');
 const { cadastroTrabalhosSchema, cadastroGuiaSapexSchema, cadastroLocalizacaoSchema } = require('../validators/adminValidators');
 const AuthAdminController = require('../controllers/Admin/authAdminController');
 const multer = require('multer');
@@ -11,31 +12,29 @@ const upload = multer({storage})
 
 
 
-//Cadastro de trabalho e instruções 
-router.post('/cadastrotrabalhos', validationMiddleware(cadastroTrabalhosSchema), AdminController.CadastroTrabalhos);
-router.post('/guia/cadastro', validationMiddleware(cadastroGuiaSapexSchema), AdminController.CadastroInstrucao);
-router.post('/cadastrolocalizacao', validationMiddleware(cadastroLocalizacaoSchema), AdminController.CadastroLocalizacao);
-router.post('/cadastrotrabalhos/lote', upload.single('file') , AdminController.CadastroTrabalhosEmLote)
-
-
-//Gets 
-router.get('/listatrabalhos', AdminController.ListaTrabalhos); 
-router.get('/infostrabalho/:id', AdminController.InfosTrabalho); 
-router.get('/guia', AdminController.ListaInstrucao); 
-router.get('/listar', AdminController.ListarAdministradores)
-
-//deletes
-router.delete('/guia/:id', AdminController.DeletarGuiaSapex)
-router.delete('/trabalho/:id', AdminController.DeletarTrabalho)
-
-//updates
-router.put('/trabalho/editar/:id', AdminController.EditarTrabalho)
-router.put('/alterar-senha', AuthAdminController.AlterarSenha)
-
-//Autenticação
+//Rotas públicas (sem autenticação)
 router.post("/login", AuthAdminController.login)
 router.post('/esqueci-senha', AuthAdminController.EsqueciMinhaSenha)
-router.post('/cadastro', AuthAdminController.CadastroAdmin)
+
+//Rotas protegidas (com autenticação)
+router.post('/cadastrotrabalhos', authAdminMiddleware, validationMiddleware(cadastroTrabalhosSchema), AdminController.CadastroTrabalhos);
+router.post('/guia/cadastro', authAdminMiddleware, validationMiddleware(cadastroGuiaSapexSchema), AdminController.CadastroInstrucao);
+router.post('/cadastrolocalizacao', authAdminMiddleware, validationMiddleware(cadastroLocalizacaoSchema), AdminController.CadastroLocalizacao);
+router.post('/cadastrotrabalhos/lote', authAdminMiddleware, upload.single('file'), AdminController.CadastroTrabalhosEmLote)
+router.post('/cadastro', authAdminMiddleware, AuthAdminController.CadastroAdmin)
+
+router.get('/listatrabalhos', authAdminMiddleware, AdminController.ListaTrabalhos); 
+router.get('/infostrabalho/:id', authAdminMiddleware, AdminController.InfosTrabalho); 
+router.get('/guia', authAdminMiddleware, AdminController.ListaInstrucao); 
+router.get('/listar', authAdminMiddleware, AdminController.ListarAdministradores)
+
+router.delete('/guia/:id', authAdminMiddleware, AdminController.DeletarGuiaSapex)
+router.delete('/trabalho/:id', authAdminMiddleware, AdminController.DeletarTrabalho)
+
+router.put('/trabalho/editar/:id', authAdminMiddleware, AdminController.EditarTrabalho)
+router.put('/alterar-senha', authAdminMiddleware, AuthAdminController.AlterarSenha)
+
+
 
 
 
