@@ -48,7 +48,7 @@ const AlunoController = {
             console.error('Erro ao buscar nota:', error);
             return ResponseHelper.error(res, 'Erro ao buscar nota do aluno.');
         }
-    }
+    },
 }
 
 module.exports = AlunoController;  
