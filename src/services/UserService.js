@@ -1,3 +1,5 @@
+const { USER_ROLES, EMAIL_DOMAINS, MESSAGES } = require('../constants');
+
 class UserService {
     static determineUserRole(email) {
         if (!email) {
@@ -6,29 +8,25 @@ class UserService {
 
         const emailLower = email.toLowerCase();
 
-
-        if (emailLower === 'admin@fsa.br') {
-        return 'administrador';
+        if (emailLower === EMAIL_DOMAINS.ADMIN) {
+        return USER_ROLES.ADMIN;
         }
 
-
-        if (emailLower.endsWith('@graduacao.fsa.br')) {
-        return 'aluno';
+        if (emailLower.endsWith(EMAIL_DOMAINS.STUDENT)) {
+        return USER_ROLES.ALUNO;
         }
 
-        if (emailLower.endsWith('@fsa.br') || emailLower.endsWith('@gmail.com')) {
-            return 'professor';
+        if (emailLower.endsWith(EMAIL_DOMAINS.PROFESSOR) || emailLower.endsWith(EMAIL_DOMAINS.GMAIL)) {
+            return USER_ROLES.PROFESSOR;
         }
 
-
-        throw new Error('Email não pertence ao domínio institucional da Fundação Santo André autorizado');
+        throw new Error(MESSAGES.ERROR.INVALID_EMAIL);
     }
 
     static validateInstitutionalEmail(email) {
-        const allowedDomains = ['@graduacao.fsa.br', '@fsa.br', '@gmail.com'];
-        const specificAdminEmail = 'admin@fsa.br';
+        const allowedDomains = [EMAIL_DOMAINS.STUDENT, EMAIL_DOMAINS.PROFESSOR, EMAIL_DOMAINS.GMAIL];
 
-        if (email.toLowerCase() === specificAdminEmail) {
+        if (email.toLowerCase() === EMAIL_DOMAINS.ADMIN) {
         return true;
         }
 

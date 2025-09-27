@@ -1,4 +1,3 @@
-// validations/adminSchema.js
 const { z } = require("zod");
 
 const alunoSchema = z.object({
@@ -17,35 +16,35 @@ const professorSchema = z.object({
 
 const localizacaoSchema = z.object({
     predio: z.string().min(1, "Prédio é obrigatório"),
+    sala: z.string().optional(),
     ponto_referencia: z.string().min(1, "Ponto de referência é obrigatório"),
 });
 
-const cadastroTrabalhosAdminSchema = z.object({
+const cadastroTrabalhosSchema = z.object({
     titulo: z.string().min(1, "Título é obrigatório"),
     tipo: z.string().min(1, "Tipo é obrigatório"),
     data: z.string().min(1, "Data é obrigatória"),
     turma: z.string().min(1, "Turma é obrigatória"),
     horario: z.string().min(1, "Horário é obrigatório"),
-    nomeProfessor: z.string().min(1, "Nome do professor é obrigatório"),
-    emailProfessor: z.string()
-        .email("Email inválido")
-        .regex(/@fsa\.br$/, "Email deve terminar com @fsa.br"),
     n_poster: z.number(),
-    localizacao: localizacaoSchema.optional(),
-    professor: professorSchema.optional(),
+    localizacao: localizacaoSchema,
+    professor: professorSchema,
     alunos: z.array(alunoSchema).nonempty("Adicione pelo menos um aluno")
 });
 
-
 const cadastroGuiaSapexSchema = z.object({
-    titulo: z.string(),
-    descricao: z.string()
+    titulo: z.string().min(1, "Título é obrigatório"),
+    descricao: z.string().min(1, "Descrição é obrigatória")
+});
 
-})
-
-
+const cadastroLocalizacaoSchema = z.object({
+    predio: z.string().min(1, "Prédio é obrigatório"),
+    sala: z.string().min(1, "Sala é obrigatória"),
+    ponto_referencia: z.string().min(1, "Ponto de referência é obrigatório")
+});
 
 module.exports = {
-    cadastroTrabalhosAdminSchema,
-    cadastroGuiaSapexSchema
+    cadastroTrabalhosSchema,
+    cadastroGuiaSapexSchema,
+    cadastroLocalizacaoSchema
 };
