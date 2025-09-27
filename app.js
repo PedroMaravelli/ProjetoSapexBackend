@@ -13,7 +13,7 @@ const authMiddleware = require('./src/middlewares/authMiddleware')
 require('dotenv').config()
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? "https://projeto-sapex-frontend-git-dev-pedromaravellis-projects.vercel.app" : "http://localhost:5173",
+  origin: process.env.NODE_ENV === 'production' ? "https://projeto-sapex-frontend.vercel.app" : "http://localhost:5173",
   credentials: true
 }));
 
