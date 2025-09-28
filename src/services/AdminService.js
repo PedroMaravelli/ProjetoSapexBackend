@@ -36,7 +36,11 @@ class AdminService {
     });
     const templateEmailProfessor = EmailTemplates.novoTrabalhoProfessor(professorExistente.nome, novoTrabalho.titulo, novoTrabalho.data, novoTrabalho.horario)
 
-    await EmailHelper.sendEmail("Novo trabalho para avaliação Sapex!!!", professorExistente.email, templateEmailProfessor )
+    try {
+      await EmailHelper.sendEmail("Novo trabalho para avaliação Sapex!!!", professorExistente.email, templateEmailProfessor )
+    } catch(error){
+      console.error(error)
+    } 
 
     for (const aluno of alunos) {
       let alunoExistente = await Aluno.findOne({ where: { email: aluno.email } });
@@ -57,7 +61,13 @@ class AdminService {
       const subject = "Você tem um novo trabalho no Sapex"
       const template = EmailTemplates.novoTrabalhoAlunos(alunoExistente.nome, novoTrabalho.titulo, novoTrabalho.data, novoTrabalho.horario, professorExistente.nome)
 
-      await EmailHelper.sendEmail(subject, alunoExistente.email, template)
+      
+      try {
+        await EmailHelper.sendEmail(subject, alunoExistente.email, template)
+      } catch (error) {
+        console.error(error)
+      }
+      
     }
 
     return novoTrabalho;
