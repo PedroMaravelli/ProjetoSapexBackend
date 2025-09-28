@@ -24,7 +24,7 @@ const cadastroTrabalhosSchema = z.object({
     titulo: z.string().min(1, "Título é obrigatório"),
     tipo: z.string().min(1, "Tipo é obrigatório"),
     data: z.string().min(1, "Data é obrigatória"),
-    turma: z.string().min(1, "Turma é obrigatória"),
+    turma: z.string().optional(),
     horario: z.string().min(1, "Horário é obrigatório"),
     n_poster: z.number(),
     localizacao: localizacaoSchema,
